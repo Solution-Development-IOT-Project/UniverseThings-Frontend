@@ -31,6 +31,10 @@ import {AgropreLogoComponent} from '@shared/components/agropre-logo/agropre-logo
                 Progress
               </button>
 
+              <button z-button zType="ghost" class="text-muted-foreground" (click)="goToAlerts()">
+                Alertas
+              </button>
+
 
             </div>
           </nav>
@@ -53,6 +57,9 @@ export class NavbarComponent {
     this.router.navigate(['/progress/2d2631b8-0991-4934-a5a9-81c085d7f208']);
   }
 
+  goToAlerts() {
+    this.router.navigate(['/alertas']);
+  }
 
 
 }

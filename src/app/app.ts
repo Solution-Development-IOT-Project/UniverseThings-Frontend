@@ -5,11 +5,13 @@ import { DarkModeService } from '@shared/services/darkMode.service';
 import {ZardToastComponent} from '@shared/components/toast/toast.component';
 import {NavbarComponent} from './public/components/navbar/navbar.component';
 import {FooterComponent} from './public/components/footer/footer.component';
+import { StateCountPipe } from '@shared/pipes/state-count.pipe';
+import { NgFor, NgIf } from '@angular/common';
 
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, NavbarComponent, FooterComponent, ZardToastComponent],
+  imports: [RouterOutlet, NavbarComponent, FooterComponent, ZardToastComponent,StateCountPipe, NgFor,NgIf],
   template: `
      <div class="font-inter ">
 
