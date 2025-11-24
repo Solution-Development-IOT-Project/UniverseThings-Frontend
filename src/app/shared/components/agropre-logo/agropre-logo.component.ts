@@ -27,7 +27,7 @@ import { Component, Input } from '@angular/core';
   styles: ``
 })
 export class AgropreLogoComponent {
-  @Input() src: string = 'https://github.com/Solution-Development-IOT-Project/UniverseThing-Report/blob/chapter-4/assets/img/agropre.png?raw=true';
+  @Input() src: string = 'assets/agropre.png';
   @Input() size: number = 32;
   @Input() className: string = '';
 }

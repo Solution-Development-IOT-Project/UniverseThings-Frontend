@@ -11,7 +11,7 @@ import { NgFor, NgIf } from '@angular/common';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, NavbarComponent, FooterComponent, ZardToastComponent,StateCountPipe, NgFor,NgIf],
+  imports: [RouterOutlet, NavbarComponent, FooterComponent, ZardToastComponent,StateCountPipe],
   template: `
      <div class="font-inter ">
 

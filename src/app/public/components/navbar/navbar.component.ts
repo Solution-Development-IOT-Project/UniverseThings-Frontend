@@ -35,6 +35,10 @@ import {AgropreLogoComponent} from '@shared/components/agropre-logo/agropre-logo
                 Alertas
               </button>
 
+              <button z-button zType="ghost" class="text-muted-foreground" (click)="goToDatos()">
+                Datos
+              </button>
+
 
             </div>
           </nav>
@@ -59,6 +63,9 @@ export class NavbarComponent {
 
   goToAlerts() {
     this.router.navigate(['/alertas']);
+  }
+  goToDatos() {
+    this.router.navigate(['/datos']);
   }
 
 
