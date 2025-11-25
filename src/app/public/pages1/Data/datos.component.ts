@@ -1,7 +1,6 @@
 import { Component, OnInit, signal, computed } from '@angular/core';
 import { NgApexchartsModule } from 'ng-apexcharts';
 import { DatosService, TipoSensor } from '../services/datos.service';
-import { ZardToastComponent } from '@shared/components/toast/toast.component';
 import { ZardButtonComponent } from '@shared/components/button/button.component';
 import { toast } from 'ngx-sonner';
 
@@ -16,7 +15,7 @@ import {
 @Component({
   selector: 'app-datos',
   standalone: true,
-  imports: [NgApexchartsModule, ZardToastComponent, ZardButtonComponent],
+  imports: [NgApexchartsModule, ZardButtonComponent],
   template: `
     <div class="container mx-auto px-6 py-8">
 

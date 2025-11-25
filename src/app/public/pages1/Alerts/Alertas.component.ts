@@ -2,7 +2,7 @@ import { Component, signal, computed } from '@angular/core';
 import { ZardButtonComponent } from '@shared/components/button/button.component';
 import { ZardToastComponent } from '@shared/components/toast/toast.component';
 import { toast } from 'ngx-sonner';
-import { NgFor, NgIf } from '@angular/common';
+import { NgFor } from '@angular/common';
 
 
 type TipoAlerta = 'Helada' | 'Control de Plagas' | 'Mantenimiento';
@@ -19,7 +19,7 @@ interface Alerta {
 @Component({
   selector: 'app-alertas',
   standalone: true,
-  imports: [ZardButtonComponent, ZardToastComponent,NgFor, NgIf],
+  imports: [ZardButtonComponent, ZardToastComponent, NgFor],
   template: `
     <z-toaster></z-toaster>
 
