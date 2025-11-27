@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { DeviceService } from '../services/device.service';
 import { ZoneService } from '../services/zone.service'; // Import ZoneService
 import { Device, NewDevice, UpdateDevice } from '../models/device.model';
-import { Zone } from '../models/zone.model'; // Import Zone model
+import { Zone, NewZone } from '../models/zone.model'; // Import Zone and NewZone model
 import { ZardButtonComponent } from '@shared/components/button/button.component';
 import { toast } from 'ngx-sonner';
 
@@ -20,6 +20,8 @@ export class DevicesComponent implements OnInit {
   zones = signal<Zone[]>([]); // New signal for zones
   selectedDevice = signal<Device | null>(null);
   editingDevice = signal<Device | null>(null); // New signal for editing
+  showZoneCreation = false; // To toggle the zone creation form
+
   newDevice: NewDevice = {
     name: '',
     device_type: '',
@@ -27,6 +29,14 @@ export class DevicesComponent implements OnInit {
     firmware_version: '',
     is_online: false,
     zone_id: 0
+  };
+
+  newZone: NewZone = {
+    name: '',
+    crop_type: '',
+    description: '',
+    area_m2: 0,
+    parcel_id: 0
   };
 
   constructor(
@@ -37,6 +47,21 @@ export class DevicesComponent implements OnInit {
   ngOnInit(): void {
     this.loadDevices();
     this.loadZones();
+    this.resetNewDeviceForm();
+    this.resetNewZoneForm();
+  }
+
+  loadDevices(): void {
+    this.deviceService.getAllDevices().subscribe({
+      next: (data) => {
+        this.devices.set(data);
+        toast.success('Dispositivos cargados correctamente');
+      },
+      error: (err) => {
+        console.error('Error al cargar dispositivos', err);
+        toast.error('Error al cargar dispositivos');
+      }
+    });
   }
 
   loadZones(): void {
@@ -51,19 +76,6 @@ export class DevicesComponent implements OnInit {
       error: (err) => {
         console.error('Error al cargar zonas de cultivo', err);
         toast.error('Error al cargar zonas de cultivo');
-      }
-    });
-  }
-
-  loadDevices(): void {
-    this.deviceService.getAllDevices().subscribe({
-      next: (data) => {
-        this.devices.set(data);
-        toast.success('Dispositivos cargados correctamente');
-      },
-      error: (err) => {
-        console.error('Error al cargar dispositivos', err);
-        toast.error('Error al cargar dispositivos');
       }
     });
   }
@@ -147,6 +159,35 @@ export class DevicesComponent implements OnInit {
       firmware_version: '',
       is_online: false,
       zone_id: this.zones().length > 0 ? this.zones()[0].id : 0 // Set default to the first zone or 0
+    };
+  }
+
+  toggleZoneCreation(): void {
+    this.showZoneCreation = !this.showZoneCreation;
+  }
+
+  createZone(): void {
+    this.zoneService.createZone(this.newZone).subscribe({
+      next: (zone) => {
+        this.zones.update(zones => [...zones, zone]);
+        toast.success('Zona de cultivo creada correctamente');
+        this.resetNewZoneForm();
+        this.showZoneCreation = false; // Hide the form after creation
+      },
+      error: (err) => {
+        console.error('Error al crear zona de cultivo', err);
+        toast.error('Error al crear zona de cultivo');
+      }
+    });
+  }
+
+  resetNewZoneForm(): void {
+    this.newZone = {
+      name: '',
+      crop_type: '',
+      description: '',
+      area_m2: 0,
+      parcel_id: 0
     };
   }
 }
