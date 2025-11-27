@@ -1,0 +1,158 @@
+<div class="container mx-auto px-6 py-8">
+  <h1 class="text-3xl font-bold text-foreground mb-6">Gestión de Dispositivos</h1>
+
+  <!-- Sección para mostrar detalles del dispositivo seleccionado -->
+  <div *ngIf="selectedDevice() && !editingDevice()" class="bg-blue-100 dark:bg-blue-900 p-6 rounded-xl shadow mb-8 border border-blue-300 dark:border-blue-700">
+    <h2 class="text-xl font-bold text-blue-800 dark:text-blue-200 mb-4">Detalles del Dispositivo Seleccionado</h2>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-blue-700 dark:text-blue-300">
+      <p><strong>ID:</strong> {{ selectedDevice()!.id }}</p>
+      <p><strong>Nombre:</strong> {{ selectedDevice()!.name }}</p>
+      <p><strong>Tipo:</strong> {{ selectedDevice()!.device_type }}</p>
+      <p><strong>Número de Serie:</strong> {{ selectedDevice()!.serial_number }}</p>
+      <p><strong>Versión de Firmware:</strong> {{ selectedDevice()!.firmware_version }}</p>
+      <p><strong>Zona ID:</strong> {{ selectedDevice()!.zone_id }}</p>
+      <p><strong>Estado:</strong> {{ selectedDevice()!.is_online ? 'En línea' : 'Desconectado' }}</p>
+      <p><strong>Última vez visto:</strong> {{ selectedDevice()!.last_seen | date:'medium' }}</p>
+      <p><strong>Creado el:</strong> {{ selectedDevice()!.created_at | date:'medium' }}</p>
+      <p><strong>Actualizado el:</strong> {{ selectedDevice()!.updated_at | date:'medium' }}</p>
+    </div>
+    <div class="mt-4 flex justify-end">
+        <button z-button zType="secondary" (click)="selectedDevice.set(null)">Cerrar Detalles</button>
+    </div>
+  </div>
+
+  <!-- Formulario para editar dispositivo -->
+  <div *ngIf="editingDevice()" class="bg-yellow-100 dark:bg-yellow-900 p-6 rounded-xl shadow mb-8 border border-yellow-300 dark:border-yellow-700">
+    <h2 class="text-xl font-bold text-yellow-800 dark:text-yellow-200 mb-4">Editar Dispositivo</h2>
+    <form (ngSubmit)="saveEdit()" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <!-- Name -->
+      <div>
+        <label for="edit_name" class="block text-sm font-medium text-yellow-700 dark:text-yellow-300">Nombre</label>
+        <input id="edit_name" type="text" [(ngModel)]="editingDevice()!.name" name="edit_name" required
+               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary"
+               placeholder="Nombre del dispositivo">
+      </div>
+      <!-- Device Type -->
+      <div>
+        <label for="edit_device_type" class="block text-sm font-medium text-yellow-700 dark:text-yellow-300">Tipo de Dispositivo</label>
+        <input id="edit_device_type" type="text" [(ngModel)]="editingDevice()!.device_type" name="edit_device_type" required
+               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary"
+               placeholder="Ej: Sensor de Temperatura">
+      </div>
+      <!-- Serial Number -->
+      <div>
+        <label for="edit_serial_number" class="block text-sm font-medium text-yellow-700 dark:text-yellow-300">Número de Serie</label>
+        <input id="edit_serial_number" type="text" [(ngModel)]="editingDevice()!.serial_number" name="edit_serial_number" required
+               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary"
+               placeholder="SN123456789">
+      </div>
+      <!-- Firmware Version -->
+      <div>
+        <label for="edit_firmware_version" class="block text-sm font-medium text-yellow-700 dark:text-yellow-300">Versión de Firmware</label>
+        <input id="edit_firmware_version" type="text" [(ngModel)]="editingDevice()!.firmware_version" name="edit_firmware_version" required
+               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary"
+               placeholder="1.0.0">
+      </div>
+      <!-- Zone ID -->
+      <div>
+        <label for="edit_zone_id" class="block text-sm font-medium text-yellow-700 dark:text-yellow-300">Zona de Cultivo</label>
+        <select id="edit_zone_id" [(ngModel)]="editingDevice()!.zone_id" name="edit_zone_id" required
+                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary">
+          <option *ngIf="zones().length === 0" [value]="0" disabled>No hay zonas disponibles</option>
+          <option *ngFor="let zone of zones()" [value]="zone.id">{{ zone.name }}</option>
+        </select>
+      </div>
+      <!-- Is Online (Checkbox) -->
+      <div class="flex items-center mt-5">
+        <input id="edit_is_online" type="checkbox" [(ngModel)]="editingDevice()!.is_online" name="edit_is_online"
+               class="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded">
+        <label for="edit_is_online" class="ml-2 block text-sm text-yellow-700 dark:text-yellow-300">Está en línea</label>
+      </div>
+      <!-- Action Buttons -->
+      <div class="col-span-1 md:col-span-2 flex justify-end gap-2">
+        <button z-button zType="secondary" type="button" (click)="cancelEdit()">Cancelar</button>
+        <button z-button zType="default" type="submit">Guardar Cambios</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Formulario para agregar nuevo dispositivo -->
+  <div *ngIf="!editingDevice()" class="bg-background p-6 rounded-xl shadow mb-8">
+    <h2 class="text-xl font-bold mb-4">Agregar Nuevo Dispositivo</h2>
+    <form (ngSubmit)="addDevice()" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <!-- Name -->
+      <div>
+        <label for="name" class="block text-sm font-medium text-muted-foreground">Nombre</label>
+        <input id="name" type="text" [(ngModel)]="newDevice.name" name="name" required
+               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary"
+               placeholder="Nombre del dispositivo">
+      </div>
+      <!-- Device Type -->
+      <div>
+        <label for="device_type" class="block text-sm font-medium text-muted-foreground">Tipo de Dispositivo</label>
+        <input id="device_type" type="text" [(ngModel)]="newDevice.device_type" name="device_type" required
+               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary"
+               placeholder="Ej: Sensor de Temperatura">
+      </div>
+      <!-- Serial Number -->
+      <div>
+        <label for="serial_number" class="block text-sm font-medium text-muted-foreground">Número de Serie</label>
+        <input id="serial_number" type="text" [(ngModel)]="newDevice.serial_number" name="serial_number" required
+               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary"
+               placeholder="SN123456789">
+      </div>
+      <!-- Firmware Version -->
+      <div>
+        <label for="firmware_version" class="block text-sm font-medium text-muted-foreground">Versión de Firmware</label>
+        <input id="firmware_version" type="text" [(ngModel)]="newDevice.firmware_version" name="firmware_version" required
+               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary"
+               placeholder="1.0.0">
+      </div>
+      <!-- Zone ID -->
+      <div>
+        <label for="zone_id" class="block text-sm font-medium text-muted-foreground">Zona de Cultivo</label>
+        <select id="zone_id" [(ngModel)]="newDevice.zone_id" name="zone_id" required
+                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary">
+          <option *ngIf="zones().length === 0" [value]="0" disabled>No hay zonas disponibles</option>
+          <option *ngFor="let zone of zones()" [value]="zone.id">{{ zone.name }}</option>
+        </select>
+      </div>
+      <!-- Is Online (Checkbox) -->
+      <div class="flex items-center mt-5">
+        <input id="is_online" type="checkbox" [(ngModel)]="newDevice.is_online" name="is_online"
+               class="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded">
+        <label for="is_online" class="ml-2 block text-sm text-muted-foreground">Está en línea</label>
+      </div>
+      <!-- Submit Button -->
+      <div class="col-span-1 md:col-span-2 flex justify-end">
+        <button z-button zType="default" type="submit">Agregar Dispositivo</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Lista de dispositivos -->
+  <div class="bg-background p-6 rounded-xl shadow">
+    <h2 class="text-xl font-bold mb-4">Dispositivos Registrados</h2>
+    <div *ngIf="devices().length === 0" class="text-muted-foreground">No hay dispositivos registrados.</div>
+    <div *ngIf="devices().length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div *ngFor="let device of devices()" class="p-4 border rounded-lg shadow-sm bg-card flex flex-col justify-between">
+        <div>
+          <h3 class="text-lg font-semibold text-foreground">{{ device.name }}</h3>
+          <p class="text-sm text-muted-foreground">Tipo: {{ device.device_type }}</p>
+          <p class="text-sm text-muted-foreground">Serie: {{ device.serial_number }}</p>
+          <p class="text-sm text-muted-foreground">Firmware: {{ device.firmware_version }}</p>
+          <p class="text-sm text-muted-foreground">Zona: {{ device.zone_id }}</p>
+          <p class="text-sm" [ngClass]="{'text-green-500': device.is_online, 'text-red-500': !device.is_online}">
+            Estado: {{ device.is_online ? 'En línea' : 'Desconectado' }}
+          </p>
+          <p class="text-xs text-muted-foreground">Última vez visto: {{ device.last_seen | date:'short' }}</p>
+        </div>
+        <div class="mt-4 flex gap-2">
+          <button z-button zType="secondary" (click)="viewDetails(device.id)">Ver Detalles</button>
+          <button z-button zType="secondary" (click)="startEdit(device)">Editar</button>
+          <button z-button zType="destructive" (click)="deleteDevice(device.id)">Eliminar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
