@@ -39,7 +39,9 @@ import {AgropreLogoComponent} from '@shared/components/agropre-logo/agropre-logo
                 Datos
               </button>
 
-
+              <button z-button zType="ghost" class="text-muted-foreground" (click)="goToDevices()">
+                Dispositivos
+              </button>
             </div>
           </nav>
         </div>
@@ -67,6 +69,11 @@ export class NavbarComponent {
   goToDatos() {
     this.router.navigate(['/datos']);
   }
+
+  goToDevices() {
+    this.router.navigate(['/devices']);
+  }
+
 
 
 }

@@ -4,6 +4,7 @@ import { AlertasComponent } from './public/pages1/Alerts/Alertas.component';
 import { DatosComponent } from './public/pages1/Data/datos.component';
 import { LoginComponent } from './public/pages1/auth/login/login.component';
 import { RegisterComponent } from './public/pages1/auth/register/register.component';
+import { DevicesComponent } from './public/pages1/devices/devices.component';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
@@ -11,5 +12,6 @@ export const routes: Routes = [
   { path: 'register', component: RegisterComponent },
   { path: 'alertas', component: AlertasComponent },
   { path: 'datos', component: DatosComponent },
+  { path: 'devices', component: DevicesComponent },
   { path: '**', component: NotFoundComponent },
 ];

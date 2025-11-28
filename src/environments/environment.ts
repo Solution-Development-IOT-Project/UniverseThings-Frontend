@@ -1,5 +1,5 @@
 export const environment = {
   production: true,
-  apiUrl: 'https://agropre-backend.onrender.com/api/v1',
-  wsUrl: 'https://agropre-backend.onrender.com'
+  apiUrl: 'http://localhost:8000/api/v1',
+  wsUrl: 'http://localhost:8000'
 };

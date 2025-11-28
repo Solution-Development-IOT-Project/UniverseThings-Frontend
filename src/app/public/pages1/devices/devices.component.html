@@ -76,6 +76,93 @@
     </form>
   </div>
 
+  <!-- Button to toggle farm creation form -->
+  <div class="mb-4">
+    <button z-button zType="default" (click)="toggleFarmCreation()">
+      {{ showFarmCreation ? 'Cancelar Creación de Granja' : 'Crear Nueva Granja' }}
+    </button>
+  </div>
+
+  <!-- Formulario para agregar nueva granja -->
+  <div *ngIf="showFarmCreation" class="bg-purple-100 dark:bg-purple-900 p-6 rounded-xl shadow mb-8 border border-purple-300 dark:border-purple-700">
+    <h2 class="text-xl font-bold text-purple-800 dark:text-purple-200 mb-4">Crear Nueva Granja</h2>
+    <form (ngSubmit)="createFarm()" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <!-- Name -->
+      <div>
+        <label for="farm_name" class="block text-sm font-medium text-purple-700 dark:text-purple-300">Nombre de la Granja</label>
+        <input id="farm_name" type="text" [(ngModel)]="newFarm.name" name="farm_name" required
+               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary"
+               placeholder="Nombre de la granja">
+      </div>
+      <!-- Location -->
+      <div>
+        <label for="location" class="block text-sm font-medium text-purple-700 dark:text-purple-300">Ubicación</label>
+        <input id="location" type="text" [(ngModel)]="newFarm.location" name="location" required
+               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary"
+               placeholder="Ubicación de la granja">
+      </div>
+      <!-- Description -->
+      <div class="col-span-1 md:col-span-2">
+        <label for="farm_description" class="block text-sm font-medium text-purple-700 dark:text-purple-300">Descripción</label>
+        <textarea id="farm_description" [(ngModel)]="newFarm.description" name="farm_description" required
+                  class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary"
+                  placeholder="Descripción de la granja"></textarea>
+      </div>
+      <!-- Submit Button -->
+      <div class="col-span-1 md:col-span-2 flex justify-end">
+        <button z-button zType="default" type="submit">Crear Granja</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Button to toggle parcel creation form -->
+  <div class="mb-4">
+    <button z-button zType="default" (click)="toggleParcelCreation()">
+      {{ showParcelCreation ? 'Cancelar Creación de Parcela' : 'Crear Nueva Parcela' }}
+    </button>
+  </div>
+
+  <!-- Formulario para agregar nueva parcela -->
+  <div *ngIf="showParcelCreation" class="bg-indigo-100 dark:bg-indigo-900 p-6 rounded-xl shadow mb-8 border border-indigo-300 dark:border-indigo-700">
+    <h2 class="text-xl font-bold text-indigo-800 dark:text-indigo-200 mb-4">Crear Nueva Parcela</h2>
+    <form (ngSubmit)="createParcel()" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <!-- Name -->
+      <div>
+        <label for="parcel_name" class="block text-sm font-medium text-indigo-700 dark:text-indigo-300">Nombre de la Parcela</label>
+        <input id="parcel_name" type="text" [(ngModel)]="newParcel.name" name="parcel_name" required
+               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary"
+               placeholder="Nombre de la parcela">
+      </div>
+      <!-- Description -->
+      <div class="col-span-1 md:col-span-2">
+        <label for="parcel_description" class="block text-sm font-medium text-indigo-700 dark:text-indigo-300">Descripción</label>
+        <textarea id="parcel_description" [(ngModel)]="newParcel.description" name="parcel_description" required
+                  class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary"
+                  placeholder="Descripción de la parcela"></textarea>
+      </div>
+      <!-- Area Hectares -->
+      <div>
+        <label for="area_hectares" class="block text-sm font-medium text-indigo-700 dark:text-indigo-300">Área (hectáreas)</label>
+        <input id="area_hectares" type="number" [(ngModel)]="newParcel.area_hectares" name="area_hectares" required
+               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary"
+               placeholder="0">
+      </div>
+      <!-- Farm ID -->
+      <div>
+        <label for="farm_id" class="block text-sm font-medium text-indigo-700 dark:text-indigo-300">Granja</label>
+        <select id="farm_id" [(ngModel)]="newParcel.farm_id" name="farm_id" required
+                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary">
+          <option *ngIf="farms().length === 0" [value]="0" disabled>No hay granjas disponibles</option>
+          <option *ngFor="let farm of farms()" [value]="farm.id">{{ farm.name }}</option>
+        </select>
+      </div>
+      <!-- Submit Button -->
+      <div class="col-span-1 md:col-span-2 flex justify-end">
+        <button z-button zType="default" type="submit">Crear Parcela</button>
+      </div>
+    </form>
+  </div>
+
   <!-- Button to toggle zone creation form -->
   <div class="mb-4">
     <button z-button zType="default" (click)="toggleZoneCreation()">
@@ -117,10 +204,12 @@
       </div>
       <!-- Parcel ID -->
       <div>
-        <label for="parcel_id" class="block text-sm font-medium text-green-700 dark:text-green-300">ID de Parcela</label>
-        <input id="parcel_id" type="number" [(ngModel)]="newZone.parcel_id" name="parcel_id" required
-               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary"
-               placeholder="0">
+        <label for="parcel_id" class="block text-sm font-medium text-green-700 dark:text-green-300">Parcela</label>
+        <select id="parcel_id" [(ngModel)]="newZone.parcel_id" name="parcel_id" required
+                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary">
+          <option *ngIf="parcels().length === 0" [value]="0" disabled>No hay parcelas disponibles</option>
+          <option *ngFor="let parcel of parcels()" [value]="parcel.id">{{ parcel.name }}</option>
+        </select>
       </div>
       <!-- Submit Button -->
       <div class="col-span-1 md:col-span-2 flex justify-end">

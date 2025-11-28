@@ -2,9 +2,13 @@ import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DeviceService } from '../services/device.service';
-import { ZoneService } from '../services/zone.service'; // Import ZoneService
+import { ZoneService } from '../services/zone.service';
+import { FarmService } from '../services/farm.service';
+import { ParcelService } from '../services/parcel.service';
 import { Device, NewDevice, UpdateDevice } from '../models/device.model';
-import { Zone, NewZone } from '../models/zone.model'; // Import Zone and NewZone model
+import { Zone, NewZone } from '../models/zone.model';
+import { Farm, NewFarm } from '../models/farm.model';
+import { Parcel, NewParcel } from '../models/parcel.model';
 import { ZardButtonComponent } from '@shared/components/button/button.component';
 import { toast } from 'ngx-sonner';
 
@@ -17,10 +21,14 @@ import { toast } from 'ngx-sonner';
 })
 export class DevicesComponent implements OnInit {
   devices = signal<Device[]>([]);
-  zones = signal<Zone[]>([]); // New signal for zones
+  zones = signal<Zone[]>([]);
+  farms = signal<Farm[]>([]);
+  parcels = signal<Parcel[]>([]);
   selectedDevice = signal<Device | null>(null);
-  editingDevice = signal<Device | null>(null); // New signal for editing
-  showZoneCreation = false; // To toggle the zone creation form
+  editingDevice = signal<Device | null>(null);
+  showZoneCreation = false;
+  showFarmCreation = false;
+  showParcelCreation = false;
 
   newDevice: NewDevice = {
     name: '',
@@ -39,16 +47,67 @@ export class DevicesComponent implements OnInit {
     parcel_id: 0
   };
 
+  newFarm: NewFarm = {
+    name: '',
+    location: '',
+    description: ''
+  };
+
+  newParcel: NewParcel = {
+    name: '',
+    description: '',
+    area_hectares: 0,
+    farm_id: 0
+  };
+
   constructor(
     private deviceService: DeviceService,
-    private zoneService: ZoneService // Inject ZoneService
+    private zoneService: ZoneService,
+    private farmService: FarmService,
+    private parcelService: ParcelService
   ) { }
 
   ngOnInit(): void {
     this.loadDevices();
     this.loadZones();
+    this.loadFarms();
+    this.loadParcels();
     this.resetNewDeviceForm();
     this.resetNewZoneForm();
+    this.resetNewFarmForm();
+    this.resetNewParcelForm();
+  }
+
+  loadFarms(): void {
+    this.farmService.getAllFarms().subscribe({
+      next: (data) => {
+        this.farms.set(data);
+        if (data.length > 0) {
+          this.newParcel.farm_id = data[0].id; // Set default to the first farm
+        }
+        toast.success('Granjas cargadas correctamente');
+      },
+      error: (err) => {
+        console.error('Error al cargar granjas', err);
+        toast.error('Error al cargar granjas');
+      }
+    });
+  }
+
+  loadParcels(): void {
+    this.parcelService.getAllParcels().subscribe({
+      next: (data) => {
+        this.parcels.set(data);
+        if (data.length > 0) {
+          this.newZone.parcel_id = data[0].id; // Set default to the first parcel
+        }
+        toast.success('Parcelas cargadas correctamente');
+      },
+      error: (err) => {
+        console.error('Error al cargar parcelas', err);
+        toast.error('Error al cargar parcelas');
+      }
+    });
   }
 
   loadDevices(): void {
@@ -166,6 +225,14 @@ export class DevicesComponent implements OnInit {
     this.showZoneCreation = !this.showZoneCreation;
   }
 
+  toggleFarmCreation(): void {
+    this.showFarmCreation = !this.showFarmCreation;
+  }
+
+  toggleParcelCreation(): void {
+    this.showParcelCreation = !this.showParcelCreation;
+  }
+
   createZone(): void {
     this.zoneService.createZone(this.newZone).subscribe({
       next: (zone) => {
@@ -181,13 +248,60 @@ export class DevicesComponent implements OnInit {
     });
   }
 
+  createFarm(): void {
+    this.farmService.createFarm(this.newFarm).subscribe({
+      next: (farm) => {
+        this.farms.update(farms => [...farms, farm]);
+        toast.success('Granja creada correctamente');
+        this.resetNewFarmForm();
+        this.showFarmCreation = false; // Hide the form after creation
+      },
+      error: (err) => {
+        console.error('Error al crear granja', err);
+        toast.error('Error al crear granja');
+      }
+    });
+  }
+
+  createParcel(): void {
+    this.parcelService.createParcel(this.newParcel).subscribe({
+      next: (parcel) => {
+        this.parcels.update(parcels => [...parcels, parcel]);
+        toast.success('Parcela creada correctamente');
+        this.resetNewParcelForm();
+        this.showParcelCreation = false; // Hide the form after creation
+      },
+      error: (err) => {
+        console.error('Error al crear parcela', err);
+        toast.error('Error al crear parcela');
+      }
+    });
+  }
+
   resetNewZoneForm(): void {
     this.newZone = {
       name: '',
       crop_type: '',
       description: '',
       area_m2: 0,
-      parcel_id: 0
+      parcel_id: this.parcels().length > 0 ? this.parcels()[0].id : 0
+    };
+  }
+
+  resetNewFarmForm(): void {
+    this.newFarm = {
+      name: '',
+      location: '',
+      description: ''
+    };
+  }
+
+  resetNewParcelForm(): void {
+    this.newParcel = {
+      name: '',
+      description: '',
+      area_hectares: 0,
+      farm_id: this.farms().length > 0 ? this.farms()[0].id : 0
     };
   }
 }
