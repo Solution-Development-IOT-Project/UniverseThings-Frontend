@@ -5,6 +5,7 @@ import { DatosComponent } from './public/pages1/Data/datos.component';
 import { LoginComponent } from './public/pages1/auth/login/login.component';
 import { RegisterComponent } from './public/pages1/auth/register/register.component';
 import { DevicesComponent } from './public/pages1/devices/devices.component';
+import { CamarasComponent } from './public/pages1/camaras/camaras.component';
 
 
 export const routes: Routes = [
@@ -14,5 +15,6 @@ export const routes: Routes = [
   { path: 'alertas', component: AlertasComponent },
   { path: 'datos', component: DatosComponent },
   { path: 'devices', component: DevicesComponent },
+  { path: 'camaras', component: CamarasComponent },
   { path: '**', component: NotFoundComponent },
 ];

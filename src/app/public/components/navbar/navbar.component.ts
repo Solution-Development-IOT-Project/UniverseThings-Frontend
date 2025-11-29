@@ -28,8 +28,8 @@ import {AgropreLogoComponent} from '@shared/components/agropre-logo/agropre-logo
                 Dashboard
               </button>
 
-              <button z-button zType="ghost" class="text-muted-foreground" (click)="goToProgress()">
-                Progress
+              <button z-button zType="ghost" class="text-muted-foreground" (click)="goToCamaras()">
+                Camaras
               </button>
 
               <button z-button zType="ghost" class="text-muted-foreground" (click)="goToAlerts()">
@@ -60,8 +60,8 @@ export class NavbarComponent {
     this.router.navigate(['/dashboard']);
   }
 
-  goToProgress() {
-    this.router.navigate(['/progress/2d2631b8-0991-4934-a5a9-81c085d7f208']);
+  goToCamaras() {
+    this.router.navigate(['/camaras']);
   }
 
   goToAlerts() {
