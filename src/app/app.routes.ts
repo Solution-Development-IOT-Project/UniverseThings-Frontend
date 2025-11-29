@@ -6,12 +6,14 @@ import { LoginComponent } from './public/pages1/auth/login/login.component';
 import { RegisterComponent } from './public/pages1/auth/register/register.component';
 import { DevicesComponent } from './public/pages1/devices/devices.component';
 import { CamarasComponent } from './public/pages1/camaras/camaras.component';
+import { DashboardComponent } from './public/pages1/dashboard/dashboard.component';
 
 
 export const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
   { path: 'login', component: LoginComponent },
   { path: 'register', component: RegisterComponent },
+  { path: 'dashboard', component: DashboardComponent },
   { path: 'alertas', component: AlertasComponent },
   { path: 'datos', component: DatosComponent },
   { path: 'devices', component: DevicesComponent },
