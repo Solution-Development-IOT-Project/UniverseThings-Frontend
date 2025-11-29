@@ -9,6 +9,7 @@ export interface Zone {
   updated_at: string;
 }
 
+
 export interface NewZone {
   name: string;
   crop_type: string;

@@ -12,6 +12,7 @@ export class FarmService {
 
   constructor(private http: HttpClient) { }
 
+
   getAllFarms(): Observable<Farm[]> {
     return this.http.get<Farm[]>(this.apiUrl);
   }

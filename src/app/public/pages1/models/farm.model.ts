@@ -7,6 +7,7 @@ export interface Farm {
   updated_at: string;
 }
 
+
 export interface NewFarm {
   name: string;
   location: string;

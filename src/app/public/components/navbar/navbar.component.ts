@@ -6,6 +6,7 @@ import {AgropreLogoComponent} from '@shared/components/agropre-logo/agropre-logo
 
 
 @Component({
+
   selector: 'app-navbar',
   imports: [
     ZardMenuModule,

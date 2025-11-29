@@ -8,6 +8,7 @@ export interface Parcel {
   updated_at: string;
 }
 
+
 export interface NewParcel {
   name: string;
   description: string;

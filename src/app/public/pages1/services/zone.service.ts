@@ -12,6 +12,7 @@ export class ZoneService {
 
   constructor(private http: HttpClient) { }
 
+
   getAllZones(): Observable<Zone[]> {
     return this.http.get<Zone[]>(this.apiUrl);
   }

@@ -16,6 +16,7 @@ export class ParcelService {
     return this.http.get<Parcel[]>(this.apiUrl);
   }
 
+
   createParcel(parcel: NewParcel): Observable<Parcel> {
     return this.http.post<Parcel>(this.apiUrl, parcel);
   }

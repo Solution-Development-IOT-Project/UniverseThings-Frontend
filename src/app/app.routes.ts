@@ -6,6 +6,7 @@ import { LoginComponent } from './public/pages1/auth/login/login.component';
 import { RegisterComponent } from './public/pages1/auth/register/register.component';
 import { DevicesComponent } from './public/pages1/devices/devices.component';
 
+
 export const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
   { path: 'login', component: LoginComponent },
