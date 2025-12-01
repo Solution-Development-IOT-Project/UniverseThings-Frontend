@@ -1,4 +1,4 @@
- import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DeviceService } from '../services/device.service';
@@ -10,12 +10,13 @@ import { Zone, NewZone } from '../models/zone.model';
 import { Farm, NewFarm } from '../models/farm.model';
 import { Parcel, NewParcel } from '../models/parcel.model';
 import { ZardButtonComponent } from '@shared/components/button/button.component';
+import { ZardIconComponent } from '@shared/components/icon/icon.component';
 import { toast } from 'ngx-sonner';
 
 @Component({
   selector: 'app-devices',
   standalone: true,
-  imports: [CommonModule, FormsModule, ZardButtonComponent],
+  imports: [CommonModule, FormsModule, ZardButtonComponent, ZardIconComponent],
   templateUrl: './devices.component.html',
   styleUrl: './devices.component.css'
 })
@@ -29,6 +30,10 @@ export class DevicesComponent implements OnInit {
   showZoneCreation = false;
   showFarmCreation = false;
   showParcelCreation = false;
+  onlineDeviceCount = computed(() => this.devices().filter((device) => device.is_online).length);
+  offlineDeviceCount = computed(() => this.devices().filter((device) => !device.is_online).length);
+  zoneCount = computed(() => this.zones().length);
+  farmCount = computed(() => this.farms().length);
 
   newDevice: NewDevice = {
     name: '',

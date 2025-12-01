@@ -1,301 +1,346 @@
-<div class="container mx-auto px-6 py-8">
-  <h1 class="text-3xl font-bold text-foreground mb-6">Gestión de Dispositivos</h1>
-
-
-  <!-- Sección para mostrar detalles del dispositivo seleccionado -->
-  <div *ngIf="selectedDevice() && !editingDevice()" class="bg-blue-100 dark:bg-blue-900 p-6 rounded-xl shadow mb-8 border border-blue-300 dark:border-blue-700">
-    <h2 class="text-xl font-bold text-blue-800 dark:text-blue-200 mb-4">Detalles del Dispositivo Seleccionado</h2>
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-blue-700 dark:text-blue-300">
-      <p><strong>ID:</strong> {{ selectedDevice()!.id }}</p>
-      <p><strong>Nombre:</strong> {{ selectedDevice()!.name }}</p>
-      <p><strong>Tipo:</strong> {{ selectedDevice()!.device_type }}</p>
-      <p><strong>Número de Serie:</strong> {{ selectedDevice()!.serial_number }}</p>
-      <p><strong>Versión de Firmware:</strong> {{ selectedDevice()!.firmware_version }}</p>
-      <p><strong>Zona ID:</strong> {{ selectedDevice()!.zone_id }}</p>
-      <p><strong>Estado:</strong> {{ selectedDevice()!.is_online ? 'En línea' : 'Desconectado' }}</p>
-      <p><strong>Última vez visto:</strong> {{ selectedDevice()!.last_seen | date:'medium' }}</p>
-      <p><strong>Creado el:</strong> {{ selectedDevice()!.created_at | date:'medium' }}</p>
-      <p><strong>Actualizado el:</strong> {{ selectedDevice()!.updated_at | date:'medium' }}</p>
-    </div>
-    <div class="mt-4 flex justify-end">
-        <button z-button zType="secondary" (click)="selectedDevice.set(null)">Cerrar Detalles</button>
-    </div>
+<div class="relative isolate overflow-hidden bg-gradient-to-b from-sky-50 via-white to-white">
+  <div class="pointer-events-none absolute inset-0">
+    <div class="absolute -top-28 left-10 h-72 w-72 rounded-full bg-emerald-200/40 blur-[150px]"></div>
+    <div class="absolute bottom-0 right-6 h-96 w-96 rounded-full bg-sky-200/45 blur-[170px]"></div>
   </div>
 
-  <!-- Formulario para editar dispositivo -->
-  <div *ngIf="editingDevice()" class="bg-yellow-100 dark:bg-yellow-900 p-6 rounded-xl shadow mb-8 border border-yellow-300 dark:border-yellow-700">
-    <h2 class="text-xl font-bold text-yellow-800 dark:text-yellow-200 mb-4">Editar Dispositivo</h2>
-    <form (ngSubmit)="saveEdit()" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-      <!-- Name -->
-      <div>
-        <label for="edit_name" class="block text-sm font-medium text-yellow-700 dark:text-yellow-300">Nombre</label>
-        <input id="edit_name" type="text" [(ngModel)]="editingDevice()!.name" name="edit_name" required
-               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary"
-               placeholder="Nombre del dispositivo">
-      </div>
-      <!-- Device Type -->
-      <div>
-        <label for="edit_device_type" class="block text-sm font-medium text-yellow-700 dark:text-yellow-300">Tipo de Dispositivo</label>
-        <input id="edit_device_type" type="text" [(ngModel)]="editingDevice()!.device_type" name="edit_device_type" required
-               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary"
-               placeholder="Ej: Sensor de Temperatura">
-      </div>
-      <!-- Serial Number -->
-      <div>
-        <label for="edit_serial_number" class="block text-sm font-medium text-yellow-700 dark:text-yellow-300">Número de Serie</label>
-        <input id="edit_serial_number" type="text" [(ngModel)]="editingDevice()!.serial_number" name="edit_serial_number" required
-               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary"
-               placeholder="SN123456789">
-      </div>
-      <!-- Firmware Version -->
-      <div>
-        <label for="edit_firmware_version" class="block text-sm font-medium text-yellow-700 dark:text-yellow-300">Versión de Firmware</label>
-        <input id="edit_firmware_version" type="text" [(ngModel)]="editingDevice()!.firmware_version" name="edit_firmware_version" required
-               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary"
-               placeholder="1.0.0">
-      </div>
-      <!-- Zone ID -->
-      <div>
-        <label for="edit_zone_id" class="block text-sm font-medium text-yellow-700 dark:text-yellow-300">Zona de Cultivo</label>
-        <select id="edit_zone_id" [(ngModel)]="editingDevice()!.zone_id" name="edit_zone_id" required
-                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary">
-          <option *ngIf="zones().length === 0" [value]="0" disabled>No hay zonas disponibles</option>
-          <option *ngFor="let zone of zones()" [value]="zone.id">{{ zone.name }}</option>
-        </select>
-      </div>
-      <!-- Is Online (Checkbox) -->
-      <div class="flex items-center mt-5">
-        <input id="edit_is_online" type="checkbox" [(ngModel)]="editingDevice()!.is_online" name="edit_is_online"
-               class="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded">
-        <label for="edit_is_online" class="ml-2 block text-sm text-yellow-700 dark:text-yellow-300">Está en línea</label>
-      </div>
-      <!-- Action Buttons -->
-      <div class="col-span-1 md:col-span-2 flex justify-end gap-2">
-        <button z-button zType="secondary" type="button" (click)="cancelEdit()">Cancelar</button>
-        <button z-button zType="default" type="submit">Guardar Cambios</button>
-      </div>
-    </form>
-  </div>
-
-  <!-- Button to toggle farm creation form -->
-  <div class="mb-4">
-    <button z-button zType="default" (click)="toggleFarmCreation()">
-      {{ showFarmCreation ? 'Cancelar Creación de Granja' : 'Crear Nueva Granja' }}
-    </button>
-  </div>
-
-  <!-- Formulario para agregar nueva granja -->
-  <div *ngIf="showFarmCreation" class="bg-purple-100 dark:bg-purple-900 p-6 rounded-xl shadow mb-8 border border-purple-300 dark:border-purple-700">
-    <h2 class="text-xl font-bold text-purple-800 dark:text-purple-200 mb-4">Crear Nueva Granja</h2>
-    <form (ngSubmit)="createFarm()" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-      <!-- Name -->
-      <div>
-        <label for="farm_name" class="block text-sm font-medium text-purple-700 dark:text-purple-300">Nombre de la Granja</label>
-        <input id="farm_name" type="text" [(ngModel)]="newFarm.name" name="farm_name" required
-               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary"
-               placeholder="Nombre de la granja">
-      </div>
-      <!-- Location -->
-      <div>
-        <label for="location" class="block text-sm font-medium text-purple-700 dark:text-purple-300">Ubicación</label>
-        <input id="location" type="text" [(ngModel)]="newFarm.location" name="location" required
-               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary"
-               placeholder="Ubicación de la granja">
-      </div>
-      <!-- Description -->
-      <div class="col-span-1 md:col-span-2">
-        <label for="farm_description" class="block text-sm font-medium text-purple-700 dark:text-purple-300">Descripción</label>
-        <textarea id="farm_description" [(ngModel)]="newFarm.description" name="farm_description" required
-                  class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary"
-                  placeholder="Descripción de la granja"></textarea>
-      </div>
-      <!-- Submit Button -->
-      <div class="col-span-1 md:col-span-2 flex justify-end">
-        <button z-button zType="default" type="submit">Crear Granja</button>
-      </div>
-    </form>
-  </div>
-
-  <!-- Button to toggle parcel creation form -->
-  <div class="mb-4">
-    <button z-button zType="default" (click)="toggleParcelCreation()">
-      {{ showParcelCreation ? 'Cancelar Creación de Parcela' : 'Crear Nueva Parcela' }}
-    </button>
-  </div>
-
-  <!-- Formulario para agregar nueva parcela -->
-  <div *ngIf="showParcelCreation" class="bg-indigo-100 dark:bg-indigo-900 p-6 rounded-xl shadow mb-8 border border-indigo-300 dark:border-indigo-700">
-    <h2 class="text-xl font-bold text-indigo-800 dark:text-indigo-200 mb-4">Crear Nueva Parcela</h2>
-    <form (ngSubmit)="createParcel()" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-      <!-- Name -->
-      <div>
-        <label for="parcel_name" class="block text-sm font-medium text-indigo-700 dark:text-indigo-300">Nombre de la Parcela</label>
-        <input id="parcel_name" type="text" [(ngModel)]="newParcel.name" name="parcel_name" required
-               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary"
-               placeholder="Nombre de la parcela">
-      </div>
-      <!-- Description -->
-      <div class="col-span-1 md:col-span-2">
-        <label for="parcel_description" class="block text-sm font-medium text-indigo-700 dark:text-indigo-300">Descripción</label>
-        <textarea id="parcel_description" [(ngModel)]="newParcel.description" name="parcel_description" required
-                  class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary"
-                  placeholder="Descripción de la parcela"></textarea>
-      </div>
-      <!-- Area Hectares -->
-      <div>
-        <label for="area_hectares" class="block text-sm font-medium text-indigo-700 dark:text-indigo-300">Área (hectáreas)</label>
-        <input id="area_hectares" type="number" [(ngModel)]="newParcel.area_hectares" name="area_hectares" required
-               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary"
-               placeholder="0">
-      </div>
-      <!-- Farm ID -->
-      <div>
-        <label for="farm_id" class="block text-sm font-medium text-indigo-700 dark:text-indigo-300">Granja</label>
-        <select id="farm_id" [(ngModel)]="newParcel.farm_id" name="farm_id" required
-                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary">
-          <option *ngIf="farms().length === 0" [value]="0" disabled>No hay granjas disponibles</option>
-          <option *ngFor="let farm of farms()" [value]="farm.id">{{ farm.name }}</option>
-        </select>
-      </div>
-      <!-- Submit Button -->
-      <div class="col-span-1 md:col-span-2 flex justify-end">
-        <button z-button zType="default" type="submit">Crear Parcela</button>
-      </div>
-    </form>
-  </div>
-
-  <!-- Button to toggle zone creation form -->
-  <div class="mb-4">
-    <button z-button zType="default" (click)="toggleZoneCreation()">
-      {{ showZoneCreation ? 'Cancelar Creación de Zona' : 'Crear Nueva Zona de Cultivo' }}
-    </button>
-  </div>
-
-  <!-- Formulario para agregar nueva zona de cultivo -->
-  <div *ngIf="showZoneCreation" class="bg-green-100 dark:bg-green-900 p-6 rounded-xl shadow mb-8 border border-green-300 dark:border-green-700">
-    <h2 class="text-xl font-bold text-green-800 dark:text-green-200 mb-4">Crear Nueva Zona de Cultivo</h2>
-    <form (ngSubmit)="createZone()" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-      <!-- Name -->
-      <div>
-        <label for="zone_name" class="block text-sm font-medium text-green-700 dark:text-green-300">Nombre de la Zona</label>
-        <input id="zone_name" type="text" [(ngModel)]="newZone.name" name="zone_name" required
-               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary"
-               placeholder="Nombre de la zona">
-      </div>
-      <!-- Crop Type -->
-      <div>
-        <label for="crop_type" class="block text-sm font-medium text-green-700 dark:text-green-300">Tipo de Cultivo</label>
-        <input id="crop_type" type="text" [(ngModel)]="newZone.crop_type" name="crop_type" required
-               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary"
-               placeholder="Ej: Tomate">
-      </div>
-      <!-- Description -->
-      <div class="col-span-1 md:col-span-2">
-        <label for="description" class="block text-sm font-medium text-green-700 dark:text-green-300">Descripción</label>
-        <textarea id="description" [(ngModel)]="newZone.description" name="description" required
-                  class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary"
-                  placeholder="Descripción de la zona"></textarea>
-      </div>
-      <!-- Area m2 -->
-      <div>
-        <label for="area_m2" class="block text-sm font-medium text-green-700 dark:text-green-300">Área (m²)</label>
-        <input id="area_m2" type="number" [(ngModel)]="newZone.area_m2" name="area_m2" required
-               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary"
-               placeholder="0">
-      </div>
-      <!-- Parcel ID -->
-      <div>
-        <label for="parcel_id" class="block text-sm font-medium text-green-700 dark:text-green-300">Parcela</label>
-        <select id="parcel_id" [(ngModel)]="newZone.parcel_id" name="parcel_id" required
-                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary">
-          <option *ngIf="parcels().length === 0" [value]="0" disabled>No hay parcelas disponibles</option>
-          <option *ngFor="let parcel of parcels()" [value]="parcel.id">{{ parcel.name }}</option>
-        </select>
-      </div>
-      <!-- Submit Button -->
-      <div class="col-span-1 md:col-span-2 flex justify-end">
-        <button z-button zType="default" type="submit">Crear Zona</button>
-      </div>
-    </form>
-  </div>
-
-  <!-- Formulario para agregar nuevo dispositivo -->
-  <div *ngIf="!editingDevice()" class="bg-background p-6 rounded-xl shadow mb-8">
-    <h2 class="text-xl font-bold mb-4">Agregar Nuevo Dispositivo</h2>
-    <form (ngSubmit)="addDevice()" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-      <!-- Name -->
-      <div>
-        <label for="name" class="block text-sm font-medium text-muted-foreground">Nombre</label>
-        <input id="name" type="text" [(ngModel)]="newDevice.name" name="name" required
-               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary"
-               placeholder="Nombre del dispositivo">
-      </div>
-      <!-- Device Type -->
-      <div>
-        <label for="device_type" class="block text-sm font-medium text-muted-foreground">Tipo de Dispositivo</label>
-        <input id="device_type" type="text" [(ngModel)]="newDevice.device_type" name="device_type" required
-               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary"
-               placeholder="Ej: Sensor de Temperatura">
-      </div>
-      <!-- Serial Number -->
-      <div>
-        <label for="serial_number" class="block text-sm font-medium text-muted-foreground">Número de Serie</label>
-        <input id="serial_number" type="text" [(ngModel)]="newDevice.serial_number" name="serial_number" required
-               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary"
-               placeholder="SN123456789">
-      </div>
-      <!-- Firmware Version -->
-      <div>
-        <label for="firmware_version" class="block text-sm font-medium text-muted-foreground">Versión de Firmware</label>
-        <input id="firmware_version" type="text" [(ngModel)]="newDevice.firmware_version" name="firmware_version" required
-               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary"
-               placeholder="1.0.0">
-      </div>
-      <!-- Zone ID -->
-      <div>
-        <label for="zone_id" class="block text-sm font-medium text-muted-foreground">Zona de Cultivo</label>
-        <select id="zone_id" [(ngModel)]="newDevice.zone_id" name="zone_id" required
-                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary">
-          <option *ngIf="zones().length === 0" [value]="0" disabled>No hay zonas disponibles</option>
-          <option *ngFor="let zone of zones()" [value]="zone.id">{{ zone.name }}</option>
-        </select>
-      </div>
-      <!-- Is Online (Checkbox) -->
-      <div class="flex items-center mt-5">
-        <input id="is_online" type="checkbox" [(ngModel)]="newDevice.is_online" name="is_online"
-               class="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded">
-        <label for="is_online" class="ml-2 block text-sm text-muted-foreground">Está en línea</label>
-      </div>
-      <!-- Submit Button -->
-      <div class="col-span-1 md:col-span-2 flex justify-end">
-        <button z-button zType="default" type="submit">Agregar Dispositivo</button>
-      </div>
-    </form>
-  </div>
-
-  <!-- Lista de dispositivos -->
-  <div class="bg-background p-6 rounded-xl shadow">
-    <h2 class="text-xl font-bold mb-4">Dispositivos Registrados</h2>
-    <div *ngIf="devices().length === 0" class="text-muted-foreground">No hay dispositivos registrados.</div>
-    <div *ngIf="devices().length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      <div *ngFor="let device of devices()" class="p-4 border rounded-lg shadow-sm bg-card flex flex-col justify-between">
+  <div class="relative container mx-auto space-y-10 px-4 py-10 font-inter sm:px-6 lg:px-8">
+    <section class="devices-hero space-y-8">
+      <div class="flex flex-wrap items-center justify-between gap-6">
         <div>
-          <h3 class="text-lg font-semibold text-foreground">{{ device.name }}</h3>
-          <p class="text-sm text-muted-foreground">Tipo: {{ device.device_type }}</p>
-          <p class="text-sm text-muted-foreground">Serie: {{ device.serial_number }}</p>
-          <p class="text-sm text-muted-foreground">Firmware: {{ device.firmware_version }}</p>
-          <p class="text-sm text-muted-foreground">Zona: {{ device.zone_id }}</p>
-          <p class="text-sm" [ngClass]="{'text-green-500': device.is_online, 'text-red-500': !device.is_online}">
-            Estado: {{ device.is_online ? 'En línea' : 'Desconectado' }}
+          <p class="text-xs font-semibold uppercase tracking-[0.4em] text-primary/70">Inventario IoT</p>
+          <h1 class="text-4xl font-semibold text-foreground">Gesti&oacute;n de dispositivos</h1>
+          <p class="mt-2 max-w-2xl text-muted-foreground">
+            Monitorea equipos, sincroniza zonas de cultivo y coordina la infraestructura conectada desde un solo panel.
           </p>
-          <p class="text-xs text-muted-foreground">Última vez visto: {{ device.last_seen | date:'short' }}</p>
         </div>
-        <div class="mt-4 flex gap-2">
-          <button z-button zType="secondary" (click)="viewDetails(device.id)">Ver Detalles</button>
-          <button z-button zType="secondary" (click)="startEdit(device)">Editar</button>
-          <button z-button zType="destructive" (click)="deleteDevice(device.id)">Eliminar</button>
+        <div class="flex flex-wrap gap-3">
+          <button z-button zType="ghost" (click)="loadDevices()">Actualizar lista</button>
+          <button z-button zType="secondary" (click)="toggleZoneCreation()">Nueva zona</button>
         </div>
       </div>
+      <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <article class="stat-card">
+          <div class="stat-card__icon text-primary">
+            <z-icon zType="monitor" zSize="sm"></z-icon>
+          </div>
+          <div>
+            <p class="stat-card__label">Dispositivos</p>
+            <p class="stat-card__value">{{ devices().length }}</p>
+            <span class="stat-card__hint text-primary">Total conectados</span>
+          </div>
+        </article>
+        <article class="stat-card">
+          <div class="stat-card__icon text-emerald-600">
+            <z-icon zType="sparkles" zSize="sm"></z-icon>
+          </div>
+          <div>
+            <p class="stat-card__label">En l&iacute;nea</p>
+            <p class="stat-card__value">{{ onlineDeviceCount() }}</p>
+            <span class="stat-card__hint text-emerald-600">Telemetria activa</span>
+          </div>
+        </article>
+        <article class="stat-card">
+          <div class="stat-card__icon text-amber-500">
+            <z-icon zType="triangle-alert" zSize="sm"></z-icon>
+          </div>
+          <div>
+            <p class="stat-card__label">Offline</p>
+            <p class="stat-card__value">{{ offlineDeviceCount() }}</p>
+            <span class="stat-card__hint text-amber-600">Requieren soporte</span>
+          </div>
+        </article>
+        <article class="stat-card">
+          <div class="stat-card__icon text-sky-600">
+            <z-icon zType="layers" zSize="sm"></z-icon>
+          </div>
+          <div>
+            <p class="stat-card__label">Zonas</p>
+            <p class="stat-card__value">{{ zoneCount() }}</p>
+            <span class="stat-card__hint text-sky-600">{{ farmCount() }} granjas activas</span>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <div class="grid gap-6 lg:grid-cols-2">
+      <section *ngIf="selectedDevice() && !editingDevice()" class="panel panel--accent p-6">
+        <div class="mb-4 flex flex-wrap items-center justify-between gap-4">
+          <div>
+            <p class="text-xs font-semibold uppercase tracking-[0.4em] text-primary/70">Detalle</p>
+            <h2 class="text-2xl font-semibold">Dispositivo seleccionado</h2>
+          </div>
+          <button z-button zType="ghost" (click)="selectedDevice.set(null)">Cerrar</button>
+        </div>
+
+        <dl class="grid gap-4 sm:grid-cols-2">
+          <div>
+            <dt class="text-xs uppercase text-muted-foreground">ID</dt>
+            <dd class="text-lg font-semibold text-foreground">#{{ selectedDevice()!.id }}</dd>
+          </div>
+          <div>
+            <dt class="text-xs uppercase text-muted-foreground">Nombre</dt>
+            <dd class="text-sm text-foreground">{{ selectedDevice()!.name }}</dd>
+          </div>
+          <div>
+            <dt class="text-xs uppercase text-muted-foreground">Tipo</dt>
+            <dd class="text-sm text-foreground">{{ selectedDevice()!.device_type }}</dd>
+          </div>
+          <div>
+            <dt class="text-xs uppercase text-muted-foreground">Serie</dt>
+            <dd class="text-sm text-foreground">{{ selectedDevice()!.serial_number }}</dd>
+          </div>
+          <div>
+            <dt class="text-xs uppercase text-muted-foreground">Firmware</dt>
+            <dd class="text-sm text-foreground">{{ selectedDevice()!.firmware_version }}</dd>
+          </div>
+          <div>
+            <dt class="text-xs uppercase text-muted-foreground">Zona</dt>
+            <dd class="text-sm text-foreground">{{ selectedDevice()!.zone_id }}</dd>
+          </div>
+          <div>
+            <dt class="text-xs uppercase text-muted-foreground">Estado</dt>
+            <dd>
+              <span class="tag" [ngClass]="selectedDevice()!.is_online ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'">
+                {{ selectedDevice()!.is_online ? 'En l&iacute;nea' : 'Desconectado' }}
+              </span>
+            </dd>
+          </div>
+          <div>
+            <dt class="text-xs uppercase text-muted-foreground">&Uacute;ltima vez visto</dt>
+            <dd class="text-sm text-foreground">{{ selectedDevice()!.last_seen | date:'medium' }}</dd>
+          </div>
+          <div>
+            <dt class="text-xs uppercase text-muted-foreground">Creado</dt>
+            <dd class="text-sm text-foreground">{{ selectedDevice()!.created_at | date:'medium' }}</dd>
+          </div>
+          <div>
+            <dt class="text-xs uppercase text-muted-foreground">Actualizado</dt>
+            <dd class="text-sm text-foreground">{{ selectedDevice()!.updated_at | date:'medium' }}</dd>
+          </div>
+        </dl>
+      </section>
+
+      <section *ngIf="editingDevice()" class="panel panel--warning p-6">
+        <div class="mb-4 flex flex-wrap items-center justify-between gap-4">
+          <h2 class="text-2xl font-semibold">Editar dispositivo</h2>
+          <div class="flex gap-2">
+            <button z-button zType="secondary" type="button" (click)="cancelEdit()">Cancelar</button>
+            <button z-button zType="default" type="submit" form="edit-device-form">Guardar cambios</button>
+          </div>
+        </div>
+
+        <form id="edit-device-form" class="grid gap-4 md:grid-cols-2" (ngSubmit)="saveEdit()">
+          <div>
+            <label class="block text-sm font-medium text-foreground">Nombre</label>
+            <input id="edit_name" type="text" [(ngModel)]="editingDevice()!.name" name="edit_name" required class="form-input" />
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-foreground">Tipo de dispositivo</label>
+            <input id="edit_device_type" type="text" [(ngModel)]="editingDevice()!.device_type" name="edit_device_type" required class="form-input" />
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-foreground">N&uacute;mero de serie</label>
+            <input id="edit_serial_number" type="text" [(ngModel)]="editingDevice()!.serial_number" name="edit_serial_number" required class="form-input" />
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-foreground">Versi&oacute;n de firmware</label>
+            <input id="edit_firmware_version" type="text" [(ngModel)]="editingDevice()!.firmware_version" name="edit_firmware_version" required class="form-input" />
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-foreground">Zona de cultivo</label>
+            <select id="edit_zone_id" [(ngModel)]="editingDevice()!.zone_id" name="edit_zone_id" required class="form-input">
+              <option *ngIf="zones().length === 0" [value]="0" disabled>No hay zonas disponibles</option>
+              <option *ngFor="let zone of zones()" [value]="zone.id">{{ zone.name }}</option>
+            </select>
+          </div>
+          <div class="flex items-center gap-3">
+            <input id="edit_is_online" type="checkbox" [(ngModel)]="editingDevice()!.is_online" name="edit_is_online" class="h-5 w-5 rounded border-slate-300 text-primary focus:ring-primary" />
+            <label for="edit_is_online" class="text-sm text-foreground">Activo en tiempo real</label>
+          </div>
+        </form>
+      </section>
     </div>
+
+    <section class="panel p-6 space-y-6">
+      <div class="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <p class="text-xs font-semibold uppercase tracking-[0.4em] text-primary/70">Campos</p>
+          <h2 class="text-2xl font-semibold">Infraestructura agr&iacute;cola</h2>
+        </div>
+        <div class="flex flex-wrap gap-2">
+          <button z-button zType="ghost" (click)="toggleFarmCreation()">
+            {{ showFarmCreation ? 'Cerrar granjas' : 'Nueva granja' }}
+          </button>
+          <button z-button zType="ghost" (click)="toggleParcelCreation()">
+            {{ showParcelCreation ? 'Cerrar parcelas' : 'Nueva parcela' }}
+          </button>
+          <button z-button zType="ghost" (click)="toggleZoneCreation()">
+            {{ showZoneCreation ? 'Cerrar zonas' : 'Nueva zona' }}
+          </button>
+        </div>
+      </div>
+
+      <div class="space-y-6">
+        <div *ngIf="showFarmCreation" class="rounded-2xl border border-slate-200/70 bg-white/80 p-6">
+          <h3 class="text-lg font-semibold text-foreground">Crear granja</h3>
+          <form class="grid gap-4 md:grid-cols-2" (ngSubmit)="createFarm()">
+            <div>
+              <label class="block text-sm font-medium text-foreground">Nombre</label>
+              <input id="farm_name" type="text" [(ngModel)]="newFarm.name" name="farm_name" required class="form-input" placeholder="Granja principal" />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-foreground">Ubicaci&oacute;n</label>
+              <input id="location" type="text" [(ngModel)]="newFarm.location" name="location" required class="form-input" placeholder="Medell&iacute;n - Antioquia" />
+            </div>
+            <div class="md:col-span-2">
+              <label class="block text-sm font-medium text-foreground">Descripci&oacute;n</label>
+              <textarea id="farm_description" [(ngModel)]="newFarm.description" name="farm_description" required class="form-input"></textarea>
+            </div>
+            <div class="md:col-span-2 flex justify-end">
+              <button z-button zType="default" type="submit">Crear granja</button>
+            </div>
+          </form>
+        </div>
+
+        <div *ngIf="showParcelCreation" class="rounded-2xl border border-slate-200/70 bg-white/80 p-6">
+          <h3 class="text-lg font-semibold text-foreground">Crear parcela</h3>
+          <form class="grid gap-4 md:grid-cols-2" (ngSubmit)="createParcel()">
+            <div>
+              <label class="block text-sm font-medium text-foreground">Nombre</label>
+              <input id="parcel_name" type="text" [(ngModel)]="newParcel.name" name="parcel_name" required class="form-input" placeholder="Parcela norte" />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-foreground">Área (ha)</label>
+              <input id="area_hectares" type="number" [(ngModel)]="newParcel.area_hectares" name="area_hectares" required class="form-input" placeholder="12" />
+            </div>
+            <div class="md:col-span-2">
+              <label class="block text-sm font-medium text-foreground">Descripci&oacute;n</label>
+              <textarea id="parcel_description" [(ngModel)]="newParcel.description" name="parcel_description" required class="form-input"></textarea>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-foreground">Granja</label>
+              <select id="farm_id" [(ngModel)]="newParcel.farm_id" name="farm_id" required class="form-input">
+                <option *ngIf="farms().length === 0" [value]="0" disabled>No hay granjas disponibles</option>
+                <option *ngFor="let farm of farms()" [value]="farm.id">{{ farm.name }}</option>
+              </select>
+            </div>
+            <div class="md:col-span-2 flex justify-end">
+              <button z-button zType="default" type="submit">Crear parcela</button>
+            </div>
+          </form>
+        </div>
+
+        <div *ngIf="showZoneCreation" class="rounded-2xl border border-slate-200/70 bg-white/80 p-6">
+          <h3 class="text-lg font-semibold text-foreground">Crear zona de cultivo</h3>
+          <form class="grid gap-4 md:grid-cols-2" (ngSubmit)="createZone()">
+            <div>
+              <label class="block text-sm font-medium text-foreground">Nombre</label>
+              <input id="zone_name" type="text" [(ngModel)]="newZone.name" name="zone_name" required class="form-input" />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-foreground">Tipo de cultivo</label>
+              <input id="crop_type" type="text" [(ngModel)]="newZone.crop_type" name="crop_type" required class="form-input" />
+            </div>
+            <div class="md:col-span-2">
+              <label class="block text-sm font-medium text-foreground">Descripci&oacute;n</label>
+              <textarea id="description" [(ngModel)]="newZone.description" name="description" required class="form-input"></textarea>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-foreground">Área (m&sup2;)</label>
+              <input id="area_m2" type="number" [(ngModel)]="newZone.area_m2" name="area_m2" required class="form-input" />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-foreground">Parcela</label>
+              <select id="parcel_id" [(ngModel)]="newZone.parcel_id" name="parcel_id" required class="form-input">
+                <option *ngIf="parcels().length === 0" [value]="0" disabled>No hay parcelas disponibles</option>
+                <option *ngFor="let parcel of parcels()" [value]="parcel.id">{{ parcel.name }}</option>
+              </select>
+            </div>
+            <div class="md:col-span-2 flex justify-end">
+              <button z-button zType="default" type="submit">Crear zona</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <section *ngIf="!editingDevice()" class="panel p-6 space-y-4">
+      <div>
+        <h2 class="text-2xl font-semibold">Agregar nuevo dispositivo</h2>
+        <p class="text-sm text-muted-foreground">Completa los datos para vincular un nuevo equipo IoT al ecosistema.</p>
+      </div>
+      <form class="grid gap-4 md:grid-cols-2" (ngSubmit)="addDevice()">
+        <div>
+          <label class="block text-sm font-medium text-foreground">Nombre</label>
+          <input id="name" type="text" [(ngModel)]="newDevice.name" name="name" required class="form-input" placeholder="Nodo riego 01" />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-foreground">Tipo de dispositivo</label>
+          <input id="device_type" type="text" [(ngModel)]="newDevice.device_type" name="device_type" required class="form-input" placeholder="Sensor humedad" />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-foreground">N&uacute;mero de serie</label>
+          <input id="serial_number" type="text" [(ngModel)]="newDevice.serial_number" name="serial_number" required class="form-input" placeholder="SN123456" />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-foreground">Versi&oacute;n de firmware</label>
+          <input id="firmware_version" type="text" [(ngModel)]="newDevice.firmware_version" name="firmware_version" required class="form-input" placeholder="1.0.0" />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-foreground">Zona</label>
+          <select id="zone_id" [(ngModel)]="newDevice.zone_id" name="zone_id" required class="form-input">
+            <option *ngIf="zones().length === 0" [value]="0" disabled>No hay zonas disponibles</option>
+            <option *ngFor="let zone of zones()" [value]="zone.id">{{ zone.name }}</option>
+          </select>
+        </div>
+        <div class="flex items-center gap-3">
+          <input id="is_online" type="checkbox" [(ngModel)]="newDevice.is_online" name="is_online" class="h-5 w-5 rounded border-slate-300 text-primary focus:ring-primary" />
+          <label for="is_online" class="text-sm text-foreground">Inicialmente activo</label>
+        </div>
+        <div class="md:col-span-2 flex justify-end">
+          <button z-button zType="default" type="submit">Agregar dispositivo</button>
+        </div>
+      </form>
+    </section>
+
+    <section class="panel p-6">
+      <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h2 class="text-2xl font-semibold">Dispositivos registrados</h2>
+          <p class="text-sm text-muted-foreground">Visualiza, edita o elimina equipos vinculados.</p>
+        </div>
+        <button z-button zType="ghost" (click)="loadDevices()">Refrescar</button>
+      </div>
+
+      <div *ngIf="devices().length === 0" class="text-sm text-muted-foreground">
+        No hay dispositivos registrados.
+      </div>
+
+      <div *ngIf="devices().length > 0" class="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+        <article *ngFor="let device of devices()" class="device-card">
+          <div class="flex items-center justify-between">
+            <div>
+              <h3 class="text-lg font-semibold text-foreground">{{ device.name }}</h3>
+              <p class="text-sm text-muted-foreground">Serie {{ device.serial_number }}</p>
+            </div>
+            <span class="tag" [ngClass]="device.is_online ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'">
+              {{ device.is_online ? 'En l&iacute;nea' : 'Offline' }}
+            </span>
+          </div>
+          <ul class="space-y-1 text-sm text-muted-foreground">
+            <li>Tipo: {{ device.device_type }}</li>
+            <li>Firmware: {{ device.firmware_version }}</li>
+            <li>Zona: {{ device.zone_id }}</li>
+            <li>&Uacute;ltimo ping: {{ device.last_seen | date:'short' }}</li>
+          </ul>
+          <div class="flex flex-wrap gap-2">
+            <button z-button zType="secondary" (click)="viewDetails(device.id)">Detalles</button>
+            <button z-button zType="secondary" (click)="startEdit(device)">Editar</button>
+            <button z-button zType="destructive" (click)="deleteDevice(device.id)">Eliminar</button>
+          </div>
+        </article>
+      </div>
+    </section>
   </div>
 </div>

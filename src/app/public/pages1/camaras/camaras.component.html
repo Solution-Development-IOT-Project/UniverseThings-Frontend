@@ -1,55 +1,416 @@
-<div class="container mx-auto px-6 py-8 space-y-8">
-  <div>
-    <h1 class="text-3xl font-bold text-foreground">Gestion de Camaras</h1>
-    <p class="text-muted-foreground">Administra las camaras instaladas, actualiza su informacion y revisa las ultimas capturas enviadas.</p>
+<div class="relative isolate overflow-hidden bg-gradient-to-b from-emerald-50 via-white to-white">
+  <div class="pointer-events-none absolute inset-0">
+    <div class="absolute -top-32 right-0 h-80 w-80 rounded-full bg-emerald-200/45 blur-[150px]"></div>
+    <div class="absolute bottom-0 left-4 h-96 w-96 rounded-full bg-sky-200/40 blur-[160px]"></div>
   </div>
 
-  <div class="grid gap-6 lg:grid-cols-[2fr_1fr]">
-    <section class="bg-card text-card-foreground border border-border/40 rounded-2xl p-6 shadow-sm">
-      <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+  <div class="relative container mx-auto space-y-10 px-4 py-10 sm:px-6 lg:px-8">
+    <section class="cameras-hero space-y-8">
+      <div class="flex flex-wrap items-center justify-between gap-6">
         <div>
-          <h2 class="text-xl font-semibold">Listado de camaras</h2>
-          <p class="text-sm text-muted-foreground">Selecciona una camara para ver sus detalles o editarla.</p>
+          <p class="text-xs font-semibold uppercase tracking-[0.4em] text-primary/70">Visión en vivo</p>
+          <h1 class="text-4xl font-semibold text-foreground">Gestión de cámaras</h1>
+          <p class="mt-2 text-muted-foreground max-w-2xl">
+            Administra las cámaras instaladas, actualiza su información y revisa las últimas capturas enviadas en segundos.
+          </p>
         </div>
-        <button z-button zType="ghost" (click)="loadCameras()">Actualizar lista</button>
+        <div class="flex flex-wrap gap-3">
+          <button z-button zType="ghost" (click)="loadAllImages()">Actualizar catálogo</button>
+          <button z-button zType="secondary" (click)="loadCameras()">Actualizar lista</button>
+        </div>
+      </div>
+      <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <article class="stat-card">
+          <div class="stat-card__icon text-primary">
+            <z-icon zType="monitor" zSize="sm"></z-icon>
+          </div>
+          <div>
+            <p class="stat-card__label">Cámaras</p>
+            <p class="stat-card__value">{{ cameras().length }}</p>
+            <span class="stat-card__hint text-primary">Totales registradas</span>
+          </div>
+        </article>
+        <article class="stat-card">
+          <div class="stat-card__icon text-emerald-600">
+            <z-icon zType="circle-check" zSize="sm"></z-icon>
+          </div>
+          <div>
+            <p class="stat-card__label">Activas</p>
+            <p class="stat-card__value">{{ activeCameraCount() }}</p>
+            <span class="stat-card__hint text-emerald-600">En monitoreo</span>
+          </div>
+        </article>
+        <article class="stat-card">
+          <div class="stat-card__icon text-amber-500">
+            <z-icon zType="triangle-alert" zSize="sm"></z-icon>
+          </div>
+          <div>
+            <p class="stat-card__label">Inactivas</p>
+            <p class="stat-card__value">{{ inactiveCameraCount() }}</p>
+            <span class="stat-card__hint text-amber-600">Requieren revisión</span>
+          </div>
+        </article>
+        <article class="stat-card">
+          <div class="stat-card__icon text-sky-600">
+            <z-icon zType="square-library" zSize="sm"></z-icon>
+          </div>
+          <div>
+            <p class="stat-card__label">Catálogo</p>
+            <p class="stat-card__value">{{ imageCatalogCount() }}</p>
+            <span class="stat-card__hint text-sky-600">Imágenes totales</span>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <div class="grid gap-6 lg:grid-cols-[2fr_1fr]">
+      <section class="panel p-6">
+        <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+          <div>
+            <h2 class="text-xl font-semibold">Listado de cámaras</h2>
+            <p class="text-sm text-muted-foreground">Selecciona una cámara para ver detalles o editarla.</p>
+          </div>
+          <button z-button zType="ghost" (click)="loadCameras()">Actualizar lista</button>
+        </div>
+
+        <div *ngIf="cameras().length === 0" class="text-muted-foreground text-sm">
+          Todavía no hay cámaras registradas.
+        </div>
+
+        <div *ngIf="cameras().length > 0" class="overflow-x-auto -mx-4 sm:mx-0">
+          <table class="min-w-full text-sm">
+            <thead class="text-xs uppercase tracking-wide text-muted-foreground border-b">
+              <tr>
+                <th class="py-2 px-4 text-left">Nombre</th>
+                <th class="py-2 px-4 text-left">Tipo</th>
+                <th class="py-2 px-4 text-left">Modelo</th>
+                <th class="py-2 px-4 text-left">Estado</th>
+                <th class="py-2 px-4 text-left">Zona</th>
+                <th class="py-2 px-4 text-left">Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let camera of cameras(); trackBy: trackByCamera" class="border-b last:border-0">
+                <td class="py-3 px-4 font-medium text-foreground">{{ camera.name }}</td>
+                <td class="py-3 px-4 text-muted-foreground">{{ camera.camera_type }}</td>
+                <td class="py-3 px-4 text-muted-foreground">{{ camera.model }}</td>
+                <td class="py-3 px-4">
+                  <span
+                    class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold"
+                    [ngClass]="camera.is_active
+                      ? 'bg-emerald-100 text-emerald-800'
+                      : 'bg-rose-100 text-rose-800'">
+                    {{ camera.is_active ? 'Activa' : 'Inactiva' }}
+                  </span>
+                </td>
+                <td class="py-3 px-4 text-muted-foreground">{{ getZoneName(camera.zone_id) }}</td>
+                <td class="py-3 px-4">
+                  <div class="flex flex-wrap items-center gap-2">
+                    <button z-button zType="secondary" (click)="selectCamera(camera)">Detalles</button>
+                    <button z-button zType="outline" (click)="startEdit(camera)">Editar</button>
+                    <button z-button zType="destructive" (click)="deleteCamera(camera.id)">Eliminar</button>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="panel panel--accent p-6 space-y-4">
+        <div>
+          <h2 class="text-xl font-semibold">Registrar cámara</h2>
+          <p class="text-sm text-muted-foreground">Añade un nuevo equipo a la red IoT.</p>
+        </div>
+        <form class="space-y-4" (ngSubmit)="createCamera()">
+          <div>
+            <label class="block text-sm font-medium text-foreground">Nombre</label>
+            <input
+              type="text"
+              [(ngModel)]="newCamera.name"
+              name="new_name"
+              required
+              placeholder="Ej: Cámara Norte"
+              class="form-input" />
+          </div>
+          <div class="grid gap-4 md:grid-cols-2">
+            <div>
+              <label class="block text-sm font-medium text-foreground">Tipo</label>
+              <input
+                type="text"
+                [(ngModel)]="newCamera.camera_type"
+                name="new_type"
+                required
+                placeholder="360º, PTZ"
+                class="form-input" />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-foreground">Modelo</label>
+              <input
+                type="text"
+                [(ngModel)]="newCamera.model"
+                name="new_model"
+                required
+                placeholder="Modelo del fabricante"
+                class="form-input" />
+            </div>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-foreground">Ubicación</label>
+            <textarea
+              rows="2"
+              [(ngModel)]="newCamera.location_description"
+              name="new_location"
+              placeholder="Ej: Torre principal, vista al invernadero."
+              class="form-input"></textarea>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-foreground">Zona</label>
+            <select
+              [(ngModel)]="newCamera.zone_id"
+              name="new_zone"
+              [disabled]="zones().length === 0"
+              class="form-input">
+              <option *ngIf="zones().length === 0" [value]="0" disabled>No hay zonas disponibles</option>
+              <option *ngFor="let zone of zones()" [value]="zone.id">
+                {{ zone.name }}
+              </option>
+            </select>
+          </div>
+          <label class="flex items-center gap-2 text-sm font-medium text-foreground">
+            <input
+              type="checkbox"
+              [(ngModel)]="newCamera.is_active"
+              name="new_is_active"
+              class="h-4 w-4 rounded border border-slate-300 text-primary focus:ring-primary" />
+            Cámara activa
+          </label>
+          <button z-button type="submit" class="w-full">Guardar cámara</button>
+        </form>
+      </section>
+    </div>
+
+    <section *ngIf="editingCamera()" class="panel panel--warning p-6">
+      <div class="mb-4 flex flex-wrap items-center justify-between gap-4">
+        <h2 class="text-2xl font-semibold">Editar cámara</h2>
+        <div class="flex gap-2">
+          <button z-button zType="secondary" (click)="cancelEdit()">Cancelar</button>
+        </div>
       </div>
 
-      <div *ngIf="cameras().length === 0" class="text-muted-foreground text-sm">
-        Todavia no hay camaras registradas.
+      <form class="grid gap-4 md:grid-cols-2" (ngSubmit)="saveEdit()">
+        <div>
+          <label class="block text-sm font-medium text-foreground">Nombre</label>
+          <input
+            type="text"
+            [(ngModel)]="editingCamera()!.name"
+            name="edit_name"
+            required
+            class="form-input" />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-foreground">Tipo</label>
+          <input
+            type="text"
+            [(ngModel)]="editingCamera()!.camera_type"
+            name="edit_type"
+            required
+            class="form-input" />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-foreground">Modelo</label>
+          <input
+            type="text"
+            [(ngModel)]="editingCamera()!.model"
+            name="edit_model"
+            required
+            class="form-input" />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-foreground">Zona</label>
+          <select
+            [(ngModel)]="editingCamera()!.zone_id"
+            name="edit_zone"
+            class="form-input">
+            <option *ngFor="let zone of zones()" [value]="zone.id">
+              {{ zone.name }}
+            </option>
+          </select>
+        </div>
+        <div class="md:col-span-2">
+          <label class="block text-sm font-medium text-foreground">Ubicación</label>
+          <textarea
+            rows="2"
+            [(ngModel)]="editingCamera()!.location_description"
+            name="edit_location"
+            class="form-input"></textarea>
+        </div>
+        <label class="flex items-center gap-2 text-sm font-medium text-foreground">
+          <input
+            type="checkbox"
+            [(ngModel)]="editingCamera()!.is_active"
+            name="edit_is_active"
+            class="h-4 w-4 rounded border border-slate-300 text-primary focus:ring-primary" />
+          Cámara activa
+        </label>
+        <div class="md:col-span-2 flex justify-end">
+          <button z-button zType="default" type="submit">Guardar cambios</button>
+        </div>
+      </form>
+    </section>
+
+    <div *ngIf="selectedCamera()" class="grid gap-6 lg:grid-cols-2">
+      <section class="panel p-6">
+        <div class="mb-4 flex flex-wrap items-center justify-between gap-4">
+          <h2 class="text-xl font-semibold">Detalles de la cámara</h2>
+          <button z-button zType="ghost" (click)="clearSelection()">Cerrar</button>
+        </div>
+        <dl class="grid gap-4 sm:grid-cols-2">
+          <div>
+            <dt class="detail-label">Nombre</dt>
+            <dd class="detail-value">{{ selectedCamera()!.name }}</dd>
+          </div>
+          <div>
+            <dt class="detail-label">Tipo</dt>
+            <dd class="detail-value text-sm">{{ selectedCamera()!.camera_type }}</dd>
+          </div>
+          <div>
+            <dt class="detail-label">Modelo</dt>
+            <dd class="detail-value text-sm">{{ selectedCamera()!.model }}</dd>
+          </div>
+          <div>
+            <dt class="detail-label">Estado</dt>
+            <dd class="detail-value">
+              <span class="tag" [ngClass]="selectedCamera()!.is_active ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'">
+                {{ selectedCamera()!.is_active ? 'Activa' : 'Inactiva' }}
+              </span>
+            </dd>
+          </div>
+          <div class="sm:col-span-2">
+            <dt class="detail-label">Descripción de ubicación</dt>
+            <dd class="detail-value text-sm text-muted-foreground">{{ selectedCamera()!.location_description }}</dd>
+          </div>
+          <div>
+            <dt class="detail-label">Zona</dt>
+            <dd class="detail-value text-sm">{{ getZoneName(selectedCamera()!.zone_id) }}</dd>
+          </div>
+          <div>
+            <dt class="detail-label">Última actualización</dt>
+            <dd class="detail-value text-sm">{{ selectedCamera()!.updated_at | date:'medium' }}</dd>
+          </div>
+          <div>
+            <dt class="detail-label">Creada</dt>
+            <dd class="detail-value text-sm">{{ selectedCamera()!.created_at | date:'medium' }}</dd>
+          </div>
+          <div>
+            <dt class="detail-label">ID</dt>
+            <dd class="detail-value text-sm text-muted-foreground">#{{ selectedCamera()!.id }}</dd>
+          </div>
+        </dl>
+      </section>
+
+      <section class="panel panel--accent p-6">
+        <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <h2 class="text-xl font-semibold">Últimas imágenes</h2>
+            <p class="text-sm text-muted-foreground">Límite actual: {{ imagesLimit }} registros.</p>
+          </div>
+          <div class="flex flex-wrap items-center gap-3">
+            <label class="flex items-center gap-2 text-sm text-muted-foreground">
+              Límite
+              <select
+                class="rounded-2xl border border-slate-200 bg-white/80 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
+                [value]="imagesLimit"
+                (change)="updateImagesLimit($event)">
+                <option *ngFor="let limit of [5,10,25,50]" [value]="limit">
+                  {{ limit }}
+                </option>
+              </select>
+            </label>
+            <button z-button zType="secondary" (click)="refreshImages()">Recargar</button>
+          </div>
+        </div>
+
+        <div *ngIf="isLoadingImages()" class="text-sm text-muted-foreground">
+          Cargando imágenes...
+        </div>
+
+        <div *ngIf="!isLoadingImages() && cameraImages().length === 0" class="text-sm text-muted-foreground">
+          No hay imágenes disponibles para esta cámara.
+        </div>
+
+        <div *ngIf="!isLoadingImages() && cameraImages().length > 0" class="max-h-96 space-y-4 overflow-y-auto pr-2">
+          <article *ngFor="let image of cameraImages()" class="rounded-2xl border border-slate-200/60 bg-white/85 p-4">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <div>
+                <p class="text-sm font-semibold uppercase tracking-[0.3em] text-primary/70">{{ image.image_type || 'Captura' }}</p>
+                <p class="text-xs text-muted-foreground">{{ image.captured_at | date:'short' }}</p>
+              </div>
+              <div class="flex flex-wrap gap-2">
+                <button z-button zType="outline" (click)="startImageEdit(image)">Editar</button>
+                <button z-button zType="destructive" (click)="deleteImage(image.id)">Eliminar</button>
+              </div>
+            </div>
+            <p class="text-xs text-muted-foreground break-all">Ruta: {{ image.file_path }}</p>
+            <p class="text-sm text-muted-foreground">{{ image.metadata || 'Sin metadatos' }}</p>
+            <p class="text-sm text-muted-foreground">{{ image.analysis_result || 'Sin análisis' }}</p>
+          </article>
+        </div>
+      </section>
+    </div>
+
+    <section class="panel p-6 space-y-4">
+      <div class="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h2 class="text-xl font-semibold">Catálogo global</h2>
+          <p class="text-sm text-muted-foreground">Gestiona todas las capturas sin importar la cámara.</p>
+        </div>
+        <div class="flex flex-wrap items-center gap-3">
+          <label class="flex items-center gap-2 text-sm text-muted-foreground">
+            Filtrar por cámara
+            <select
+              class="rounded-2xl border border-slate-200 bg-white/80 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
+              [value]="imageFilterCameraId()"
+              (change)="setImageFilter($event)">
+              <option value="0">Todas</option>
+              <option *ngFor="let camera of cameras()" [value]="camera.id">
+                {{ camera.name }}
+              </option>
+            </select>
+          </label>
+          <button z-button zType="secondary" (click)="loadAllImages()">Actualizar catálogo</button>
+        </div>
       </div>
 
-      <div *ngIf="cameras().length > 0" class="overflow-x-auto -mx-4 sm:mx-0">
+      <div *ngIf="isLoadingImageCatalog()" class="text-sm text-muted-foreground">
+        Cargando catálogo de imágenes...
+      </div>
+
+      <div *ngIf="!isLoadingImageCatalog() && filteredImages().length === 0" class="text-sm text-muted-foreground">
+        No hay imágenes registradas con el filtro seleccionado.
+      </div>
+
+      <div *ngIf="!isLoadingImageCatalog() && filteredImages().length > 0" class="overflow-x-auto -mx-4 sm:mx-0">
         <table class="min-w-full text-sm">
           <thead class="text-xs uppercase tracking-wide text-muted-foreground border-b">
             <tr>
-              <th class="py-2 px-4 text-left">Nombre</th>
+              <th class="py-2 px-4 text-left">Archivo</th>
               <th class="py-2 px-4 text-left">Tipo</th>
-              <th class="py-2 px-4 text-left">Modelo</th>
-              <th class="py-2 px-4 text-left">Estado</th>
-              <th class="py-2 px-4 text-left">Zona</th>
+              <th class="py-2 px-4 text-left">Cámara</th>
+              <th class="py-2 px-4 text-left">Capturada</th>
               <th class="py-2 px-4 text-left">Acciones</th>
             </tr>
           </thead>
           <tbody>
-            <tr *ngFor="let camera of cameras(); trackBy: trackByCamera" class="border-b last:border-0">
-              <td class="py-3 px-4 font-medium text-foreground">{{ camera.name }}</td>
-              <td class="py-3 px-4 text-muted-foreground">{{ camera.camera_type }}</td>
-              <td class="py-3 px-4 text-muted-foreground">{{ camera.model }}</td>
-              <td class="py-3 px-4">
-                <span
-                  class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold"
-                  [ngClass]="camera.is_active
-                    ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-200'
-                    : 'bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-200'">
-                  {{ camera.is_active ? 'Activa' : 'Inactiva' }}
-                </span>
-              </td>
-              <td class="py-3 px-4 text-muted-foreground">{{ getZoneName(camera.zone_id) }}</td>
+            <tr *ngFor="let image of filteredImages()" class="border-b last:border-0">
+              <td class="py-3 px-4 font-medium break-all text-foreground">{{ image.file_path }}</td>
+              <td class="py-3 px-4 text-muted-foreground">{{ image.image_type || 'N/D' }}</td>
+              <td class="py-3 px-4 text-muted-foreground">{{ getCameraName(image.camera_id) }}</td>
+              <td class="py-3 px-4 text-muted-foreground">{{ image.captured_at | date:'short' }}</td>
               <td class="py-3 px-4">
                 <div class="flex flex-wrap items-center gap-2">
-                  <button z-button zType="secondary" (click)="selectCamera(camera)">Detalles</button>
-                  <button z-button zType="outline" (click)="startEdit(camera)">Editar</button>
-                  <button z-button zType="destructive" (click)="deleteCamera(camera.id)">Eliminar</button>
+                  <button z-button zType="outline" (click)="startImageEdit(image)">Editar</button>
+                  <button z-button zType="destructive" (click)="deleteImage(image.id)">Eliminar</button>
                 </div>
               </td>
             </tr>
@@ -58,463 +419,132 @@
       </div>
     </section>
 
-    <section class="bg-card text-card-foreground border border-border/40 rounded-2xl p-6 shadow-sm">
-      <h2 class="text-xl font-semibold mb-4">Registrar camara</h2>
-      <form class="space-y-4" (ngSubmit)="createCamera()">
-        <div class="grid gap-4">
-          <div>
-            <label for="new_name" class="block text-sm font-medium text-foreground">Nombre</label>
-            <input
-              id="new_name"
-              name="new_name"
-              type="text"
-              [(ngModel)]="newCamera.name"
-              required
-              placeholder="Ej: Camara Norte"
-              class="mt-1 block w-full rounded-lg border border-border/50 bg-background px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary" />
-          </div>
-
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label for="new_type" class="block text-sm font-medium text-foreground">Tipo</label>
-              <input
-                id="new_type"
-                name="new_type"
-                type="text"
-                [(ngModel)]="newCamera.camera_type"
-                required
-                placeholder="360 deg, PTZ, etc."
-                class="mt-1 block w-full rounded-lg border border-border/50 bg-background px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary" />
-            </div>
-            <div>
-              <label for="new_model" class="block text-sm font-medium text-foreground">Modelo</label>
-              <input
-                id="new_model"
-                name="new_model"
-                type="text"
-                [(ngModel)]="newCamera.model"
-                required
-                placeholder="Modelo del fabricante"
-                class="mt-1 block w-full rounded-lg border border-border/50 bg-background px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary" />
-            </div>
-          </div>
-
-          <div>
-            <label for="new_location" class="block text-sm font-medium text-foreground">Ubicacion</label>
-            <textarea
-              id="new_location"
-              name="new_location"
-              rows="2"
-              [(ngModel)]="newCamera.location_description"
-              required
-              placeholder="Ej: Torre principal, vista al invernadero."
-              class="mt-1 block w-full rounded-lg border border-border/50 bg-background px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary"></textarea>
-          </div>
-
-          <div>
-            <label for="new_zone" class="block text-sm font-medium text-foreground">Zona</label>
-            <select
-              id="new_zone"
-              name="new_zone"
-              [(ngModel)]="newCamera.zone_id"
-              [disabled]="zones().length === 0"
-              class="mt-1 block w-full rounded-lg border border-border/50 bg-background px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary">
-              <option *ngIf="zones().length === 0" [value]="0" disabled>
-                No hay zonas disponibles
-              </option>
-              <option *ngFor="let zone of zones()" [ngValue]="zone.id">
-                {{ zone.name }}
-              </option>
-            </select>
-          </div>
-
-          <label class="inline-flex items-center gap-2 text-sm font-medium text-foreground">
-            <input
-              type="checkbox"
-              name="new_is_active"
-              [(ngModel)]="newCamera.is_active"
-              class="h-4 w-4 rounded border border-border/50 text-primary focus:ring-primary" />
-            Camara activa
-          </label>
+    <section class="panel p-6 space-y-4">
+      <div>
+        <h2 class="text-xl font-semibold">Registrar nueva imagen</h2>
+        <p class="text-sm text-muted-foreground">Sube capturas referenciadas a la cámara correspondiente.</p>
+      </div>
+      <form class="grid gap-4 md:grid-cols-2" (ngSubmit)="createImage()">
+        <div class="md:col-span-2">
+          <label class="block text-sm font-medium text-foreground">Ruta de archivo</label>
+          <input
+            type="text"
+            name="new_image_file_path"
+            [(ngModel)]="newImage.file_path"
+            required
+            placeholder="images/camara-01/frame-001.jpg"
+            class="form-input" />
         </div>
+        <div>
+          <label class="block text-sm font-medium text-foreground">Tipo de imagen</label>
+          <input
+            type="text"
+            name="new_image_type"
+            [(ngModel)]="newImage.image_type"
+            placeholder="RGB, IR, etc."
+            class="form-input" />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-foreground">Cámara origen</label>
+          <select
+            name="new_image_camera"
+            [(ngModel)]="newImage.camera_id"
+            [disabled]="cameras().length === 0"
+            class="form-input">
+            <option *ngIf="cameras().length === 0" [value]="0" disabled>No hay cámaras disponibles</option>
+            <option *ngFor="let camera of cameras()" [value]="camera.id">{{ camera.name }}</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-foreground">Fecha de captura</label>
+          <input
+            type="text"
+            name="new_image_captured_at"
+            [(ngModel)]="newImage.captured_at"
+            class="form-input" />
+        </div>
+        <div class="md:col-span-2">
+          <label class="block text-sm font-medium text-foreground">Metadata</label>
+          <textarea
+            rows="2"
+            name="new_image_metadata"
+            [(ngModel)]="newImage.metadata"
+            class="form-input"></textarea>
+        </div>
+        <div class="md:col-span-2">
+          <label class="block text-sm font-medium text-foreground">Análisis</label>
+          <textarea
+            rows="2"
+            name="new_image_analysis"
+            [(ngModel)]="newImage.analysis_result"
+            class="form-input"></textarea>
+        </div>
+        <div class="md:col-span-2 flex justify-end">
+          <button z-button zType="default" type="submit">Registrar imagen</button>
+        </div>
+      </form>
+    </section>
 
-        <button z-button type="submit" class="w-full">
-          Guardar camara
-        </button>
+    <section *ngIf="editingImage()" class="panel panel--accent p-6">
+      <div class="mb-4 flex flex-wrap items-center justify-between gap-4">
+        <h2 class="text-xl font-semibold">Editar imagen</h2>
+        <div class="flex gap-2">
+          <button z-button zType="ghost" (click)="cancelImageEdit()">Cancelar</button>
+          <button z-button zType="secondary" (click)="saveImageEdit()">Guardar</button>
+        </div>
+      </div>
+      <form class="grid gap-4 md:grid-cols-2">
+        <div class="md:col-span-2">
+          <label class="block text-sm font-medium text-foreground">Ruta de archivo</label>
+          <input
+            type="text"
+            name="edit_image_path"
+            [(ngModel)]="editingImage()!.file_path"
+            required
+            class="form-input" />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-foreground">Tipo</label>
+          <input
+            type="text"
+            name="edit_image_type"
+            [(ngModel)]="editingImage()!.image_type"
+            class="form-input" />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-foreground">Cámara</label>
+          <select
+            name="edit_image_camera"
+            [(ngModel)]="editingImage()!.camera_id"
+            class="form-input">
+            <option *ngFor="let camera of cameras()" [ngValue]="camera.id">{{ camera.name }}</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-foreground">Fecha de captura</label>
+          <input
+            type="text"
+            name="edit_image_captured_at"
+            [(ngModel)]="editingImage()!.captured_at"
+            class="form-input" />
+        </div>
+        <div class="md:col-span-2">
+          <label class="block text-sm font-medium text-foreground">Metadata</label>
+          <textarea
+            rows="2"
+            name="edit_image_metadata"
+            [(ngModel)]="editingImage()!.metadata"
+            class="form-input"></textarea>
+        </div>
+        <div class="md:col-span-2">
+          <label class="block text-sm font-medium text-foreground">Análisis</label>
+          <textarea
+            rows="2"
+            name="edit_image_analysis"
+            [(ngModel)]="editingImage()!.analysis_result"
+            class="form-input"></textarea>
+        </div>
       </form>
     </section>
   </div>
-
-  <section *ngIf="editingCamera()" class="bg-yellow-50 dark:bg-yellow-950 border border-yellow-200 dark:border-yellow-800 rounded-2xl p-6">
-    <div class="flex flex-wrap items-center justify-between gap-4 mb-4">
-      <h2 class="text-xl font-semibold text-yellow-900 dark:text-yellow-200">Editar camara</h2>
-      <div class="flex gap-2">
-        <button z-button zType="secondary" (click)="saveEdit()">Guardar cambios</button>
-        <button z-button zType="ghost" (click)="cancelEdit()">Cancelar</button>
-      </div>
-    </div>
-
-    <form class="grid gap-4 md:grid-cols-2">
-      <div>
-        <label class="block text-sm font-medium text-yellow-900 dark:text-yellow-200">Nombre</label>
-        <input
-          type="text"
-          name="edit_name"
-          [(ngModel)]="editingCamera()!.name"
-          required
-          class="mt-1 block w-full rounded-lg border border-yellow-200 bg-white/90 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-yellow-400" />
-      </div>
-
-      <div>
-        <label class="block text-sm font-medium text-yellow-900 dark:text-yellow-200">Tipo</label>
-        <input
-          type="text"
-          name="edit_type"
-          [(ngModel)]="editingCamera()!.camera_type"
-          required
-          class="mt-1 block w-full rounded-lg border border-yellow-200 bg-white/90 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-yellow-400" />
-      </div>
-
-      <div>
-        <label class="block text-sm font-medium text-yellow-900 dark:text-yellow-200">Modelo</label>
-        <input
-          type="text"
-          name="edit_model"
-          [(ngModel)]="editingCamera()!.model"
-          required
-          class="mt-1 block w-full rounded-lg border border-yellow-200 bg-white/90 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-yellow-400" />
-      </div>
-
-      <div>
-        <label class="block text-sm font-medium text-yellow-900 dark:text-yellow-200">Zona</label>
-        <select
-          name="edit_zone"
-          [(ngModel)]="editingCamera()!.zone_id"
-          class="mt-1 block w-full rounded-lg border border-yellow-200 bg-white/90 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-yellow-400">
-          <option *ngFor="let zone of zones()" [ngValue]="zone.id">
-            {{ zone.name }}
-          </option>
-        </select>
-      </div>
-
-      <div class="md:col-span-2">
-        <label class="block text-sm font-medium text-yellow-900 dark:text-yellow-200">Ubicacion</label>
-        <textarea
-          rows="2"
-          name="edit_location"
-          [(ngModel)]="editingCamera()!.location_description"
-          class="mt-1 block w-full rounded-lg border border-yellow-200 bg-white/90 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-yellow-400"></textarea>
-      </div>
-
-      <label class="inline-flex items-center gap-2 text-sm font-medium text-yellow-900 dark:text-yellow-200">
-        <input
-          type="checkbox"
-          name="edit_is_active"
-          [(ngModel)]="editingCamera()!.is_active"
-          class="h-4 w-4 rounded border border-yellow-300 text-yellow-600 focus:ring-yellow-500" />
-        Camara activa
-      </label>
-    </form>
-  </section>
-
-  <div *ngIf="selectedCamera()" class="grid gap-6 lg:grid-cols-2">
-    <section class="bg-card text-card-foreground border border-border/40 rounded-2xl p-6 shadow-sm">
-      <div class="flex flex-wrap items-center justify-between gap-4 mb-4">
-        <div>
-          <h2 class="text-xl font-semibold">Detalles de la camara</h2>
-        </div>
-        <button z-button zType="ghost" (click)="clearSelection()">Cerrar</button>
-      </div>
-
-      <dl class="grid gap-4 sm:grid-cols-2">
-        <div>
-          <dt class="text-xs uppercase text-muted-foreground">Nombre</dt>
-          <dd class="text-lg font-semibold text-foreground">{{ selectedCamera()!.name }}</dd>
-        </div>
-        <div>
-          <dt class="text-xs uppercase text-muted-foreground">Tipo</dt>
-          <dd class="text-sm text-foreground">{{ selectedCamera()!.camera_type }}</dd>
-        </div>
-        <div>
-          <dt class="text-xs uppercase text-muted-foreground">Modelo</dt>
-          <dd class="text-sm text-foreground">{{ selectedCamera()!.model }}</dd>
-        </div>
-        <div>
-          <dt class="text-xs uppercase text-muted-foreground">Estado</dt>
-          <dd class="text-sm">
-            <span
-              class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold"
-              [ngClass]="selectedCamera()!.is_active
-                ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-200'
-                : 'bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-200'">
-              {{ selectedCamera()!.is_active ? 'Activa' : 'Inactiva' }}
-            </span>
-          </dd>
-        </div>
-        <div class="sm:col-span-2">
-          <dt class="text-xs uppercase text-muted-foreground">Descripcion de ubicacion</dt>
-          <dd class="text-sm text-foreground">{{ selectedCamera()!.location_description }}</dd>
-        </div>
-        <div>
-          <dt class="text-xs uppercase text-muted-foreground">Zona</dt>
-          <dd class="text-sm text-foreground">{{ getZoneName(selectedCamera()!.zone_id) }}</dd>
-        </div>
-        <div>
-          <dt class="text-xs uppercase text-muted-foreground">Ultima actualizacion</dt>
-          <dd class="text-sm text-foreground">{{ selectedCamera()!.updated_at | date:'medium' }}</dd>
-        </div>
-        <div>
-          <dt class="text-xs uppercase text-muted-foreground">Creada</dt>
-          <dd class="text-sm text-foreground">{{ selectedCamera()!.created_at | date:'medium' }}</dd>
-        </div>
-        <div>
-          <dt class="text-xs uppercase text-muted-foreground">ID</dt>
-          <dd class="text-sm text-muted-foreground">#{{ selectedCamera()!.id }}</dd>
-        </div>
-      </dl>
-    </section>
-
-    <section class="bg-card text-card-foreground border border-border/40 rounded-2xl p-6 shadow-sm">
-      <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
-        <div>
-          <h2 class="text-xl font-semibold">Ultimas imagenes</h2>
-          <p class="text-sm text-muted-foreground">Limite actual: {{ imagesLimit }} registros.</p>
-        </div>
-        <div class="flex flex-wrap items-center gap-3">
-          <label class="text-sm text-muted-foreground flex items-center gap-2">
-            Limite
-            <select
-              class="rounded-lg border border-border/50 bg-background px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-              [value]="imagesLimit"
-              (change)="updateImagesLimit($event)">
-              <option *ngFor="let limit of [5,10,25,50]" [value]="limit">
-                {{ limit }}
-              </option>
-            </select>
-          </label>
-          <button z-button zType="secondary" (click)="refreshImages()">Recargar</button>
-        </div>
-      </div>
-
-      <div *ngIf="isLoadingImages()" class="text-sm text-muted-foreground">
-        Cargando imagenes...
-      </div>
-
-      <div *ngIf="!isLoadingImages() && cameraImages().length === 0" class="text-sm text-muted-foreground">
-        No hay imagenes disponibles para esta camara.
-      </div>
-
-      <div *ngIf="!isLoadingImages() && cameraImages().length > 0" class="space-y-4 max-h-96 overflow-y-auto pr-2">
-        <article *ngFor="let image of cameraImages()" class="rounded-xl border border-border/40 bg-muted/20 p-4">
-          <header class="flex items-center justify-between text-sm">
-            <span class="font-semibold text-foreground">{{ image.image_type || 'Captura' }}</span>
-            <span class="text-muted-foreground">{{ image.captured_at | date:'short' }}</span>
-          </header>
-          <p class="text-xs text-muted-foreground mt-1 break-words">Archivo: {{ image.file_path }}</p>
-          <p *ngIf="image.metadata" class="text-xs text-muted-foreground mt-1 break-words">Metadata: {{ image.metadata }}</p>
-          <p *ngIf="image.analysis_result" class="text-sm text-foreground mt-2">Analisis: {{ image.analysis_result }}</p>
-        </article>
-      </div>
-    </section>
-  </div>
-
-  <section class="bg-card text-card-foreground border border-border/40 rounded-2xl p-6 shadow-sm">
-    <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
-      <div>
-        <h2 class="text-xl font-semibold">Catalogo de imagenes</h2>
-        <p class="text-sm text-muted-foreground">Gestiona todas las imagenes registradas sin importar la camara.</p>
-      </div>
-      <div class="flex flex-wrap items-center gap-3">
-        <label class="text-sm text-muted-foreground flex items-center gap-2">
-          Filtrar por camara
-          <select
-            class="rounded-lg border border-border/50 bg-background px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-            [value]="imageFilterCameraId()"
-            (change)="setImageFilter($event)">
-            <option value="0">Todas</option>
-            <option *ngFor="let camera of cameras()" [value]="camera.id">
-              {{ camera.name }}
-            </option>
-          </select>
-        </label>
-        <button z-button zType="secondary" (click)="loadAllImages()">Actualizar catalogo</button>
-      </div>
-    </div>
-
-    <div *ngIf="isLoadingImageCatalog()" class="text-sm text-muted-foreground">
-      Cargando catalogo de imagenes...
-    </div>
-
-    <div *ngIf="!isLoadingImageCatalog() && filteredImages().length === 0" class="text-sm text-muted-foreground">
-      No hay imagenes registradas con el filtro seleccionado.
-    </div>
-
-    <div *ngIf="!isLoadingImageCatalog() && filteredImages().length > 0" class="overflow-x-auto -mx-4 sm:mx-0">
-      <table class="min-w-full text-sm">
-        <thead class="text-xs uppercase tracking-wide text-muted-foreground border-b">
-          <tr>
-            <th class="py-2 px-4 text-left">Archivo</th>
-            <th class="py-2 px-4 text-left">Tipo</th>
-            <th class="py-2 px-4 text-left">Camara</th>
-            <th class="py-2 px-4 text-left">Capturada</th>
-            <th class="py-2 px-4 text-left">Acciones</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let image of filteredImages()" class="border-b last:border-0">
-            <td class="py-3 px-4 font-medium break-all text-foreground">{{ image.file_path }}</td>
-            <td class="py-3 px-4 text-muted-foreground">{{ image.image_type || 'N/D' }}</td>
-            <td class="py-3 px-4 text-muted-foreground">{{ getCameraName(image.camera_id) }}</td>
-            <td class="py-3 px-4 text-muted-foreground">{{ image.captured_at | date:'short' }}</td>
-            <td class="py-3 px-4">
-              <div class="flex flex-wrap items-center gap-2">
-                <button z-button zType="outline" (click)="startImageEdit(image)">Editar</button>
-                <button z-button zType="destructive" (click)="deleteImage(image.id)">Eliminar</button>
-              </div>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  </section>
-
-  <section class="bg-card text-card-foreground border border-border/40 rounded-2xl p-6 shadow-sm">
-    <h2 class="text-xl font-semibold mb-4">Registrar nueva imagen</h2>
-    <form class="grid gap-4 md:grid-cols-2" (ngSubmit)="createImage()">
-      <div class="md:col-span-2">
-        <label class="block text-sm font-medium text-foreground">Ruta de archivo</label>
-        <input
-          type="text"
-          name="new_image_file_path"
-          [(ngModel)]="newImage.file_path"
-          required
-          placeholder="images/camara-01/frame-001.jpg"
-          class="mt-1 block w-full rounded-lg border border-border/50 bg-background px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary" />
-      </div>
-
-      <div>
-        <label class="block text-sm font-medium text-foreground">Tipo de imagen</label>
-        <input
-          type="text"
-          name="new_image_type"
-          [(ngModel)]="newImage.image_type"
-          placeholder="RGB, IR, etc."
-          class="mt-1 block w-full rounded-lg border border-border/50 bg-background px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary" />
-      </div>
-
-      <div>
-        <label class="block text-sm font-medium text-foreground">Camara origen</label>
-        <select
-          name="new_image_camera"
-          [(ngModel)]="newImage.camera_id"
-          [disabled]="cameras().length === 0"
-          class="mt-1 block w-full rounded-lg border border-border/50 bg-background px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary">
-          <option *ngIf="cameras().length === 0" [value]="0" disabled>No hay camaras disponibles</option>
-          <option *ngFor="let camera of cameras()" [ngValue]="camera.id">{{ camera.name }}</option>
-        </select>
-      </div>
-
-      <div>
-        <label class="block text-sm font-medium text-foreground">Fecha de captura</label>
-        <input
-          type="text"
-          name="new_image_captured_at"
-          [(ngModel)]="newImage.captured_at"
-          placeholder="2025-11-29T01:14:02.690Z"
-          class="mt-1 block w-full rounded-lg border border-border/50 bg-background px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary" />
-      </div>
-
-      <div class="md:col-span-2">
-        <label class="block text-sm font-medium text-foreground">Metadata</label>
-        <textarea
-          rows="2"
-          name="new_image_metadata"
-          [(ngModel)]="newImage.metadata"
-          placeholder="Datos adicionales"
-          class="mt-1 block w-full rounded-lg border border-border/50 bg-background px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary"></textarea>
-      </div>
-
-      <div class="md:col-span-2">
-        <label class="block text-sm font-medium text-foreground">Resultado de analisis</label>
-        <textarea
-          rows="2"
-          name="new_image_analysis"
-          [(ngModel)]="newImage.analysis_result"
-          placeholder="Anomalias detectadas, clasificaciones, etc."
-          class="mt-1 block w-full rounded-lg border border-border/50 bg-background px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary"></textarea>
-      </div>
-
-      <div class="md:col-span-2">
-        <button z-button type="submit" class="w-full">Guardar imagen</button>
-      </div>
-    </form>
-  </section>
-
-  <section *ngIf="editingImage()" class="bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-2xl p-6">
-    <div class="flex flex-wrap items-center justify-between gap-4 mb-4">
-      <h2 class="text-xl font-semibold text-blue-900 dark:text-blue-100">Editar imagen</h2>
-      <div class="flex gap-2">
-        <button z-button zType="secondary" (click)="saveImageEdit()">Guardar cambios</button>
-        <button z-button zType="ghost" (click)="cancelImageEdit()">Cancelar</button>
-      </div>
-    </div>
-
-    <form class="grid gap-4 md:grid-cols-2">
-      <div class="md:col-span-2">
-        <label class="block text-sm font-medium text-blue-900 dark:text-blue-100">Ruta de archivo</label>
-        <input
-          type="text"
-          name="edit_image_path"
-          [(ngModel)]="editingImage()!.file_path"
-          required
-          class="mt-1 block w-full rounded-lg border border-blue-200 bg-white/90 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400" />
-      </div>
-
-      <div>
-        <label class="block text-sm font-medium text-blue-900 dark:text-blue-100">Tipo</label>
-        <input
-          type="text"
-          name="edit_image_type"
-          [(ngModel)]="editingImage()!.image_type"
-          class="mt-1 block w-full rounded-lg border border-blue-200 bg-white/90 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400" />
-      </div>
-
-      <div>
-        <label class="block text-sm font-medium text-blue-900 dark:text-blue-100">Camara</label>
-        <select
-          name="edit_image_camera"
-          [(ngModel)]="editingImage()!.camera_id"
-          class="mt-1 block w-full rounded-lg border border-blue-200 bg-white/90 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400">
-          <option *ngFor="let camera of cameras()" [ngValue]="camera.id">{{ camera.name }}</option>
-        </select>
-      </div>
-
-      <div>
-        <label class="block text-sm font-medium text-blue-900 dark:text-blue-100">Fecha de captura</label>
-        <input
-          type="text"
-          name="edit_image_captured_at"
-          [(ngModel)]="editingImage()!.captured_at"
-          class="mt-1 block w-full rounded-lg border border-blue-200 bg-white/90 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400" />
-      </div>
-
-      <div class="md:col-span-2">
-        <label class="block text-sm font-medium text-blue-900 dark:text-blue-100">Metadata</label>
-        <textarea
-          rows="2"
-          name="edit_image_metadata"
-          [(ngModel)]="editingImage()!.metadata"
-          class="mt-1 block w-full rounded-lg border border-blue-200 bg-white/90 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"></textarea>
-      </div>
-
-      <div class="md:col-span-2">
-        <label class="block text-sm font-medium text-blue-900 dark:text-blue-100">Analisis</label>
-        <textarea
-          rows="2"
-          name="edit_image_analysis"
-          [(ngModel)]="editingImage()!.analysis_result"
-          class="mt-1 block w-full rounded-lg border border-blue-200 bg-white/90 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"></textarea>
-      </div>
-    </form>
-  </section>
 </div>

@@ -1,223 +1,282 @@
-<div class="container mx-auto px-6 py-8 space-y-8">
-  <div class="flex flex-wrap items-center justify-between gap-4">
-    <div>
-      <h1 class="text-3xl font-bold text-foreground">Panel principal</h1>
-      <p class="text-muted-foreground">Resumen general del sistema y notificaciones mas recientes.</p>
-    </div>
-    <button z-button zType="secondary" (click)="refreshNotificationList()">Actualizar</button>
+<div class="relative isolate overflow-hidden bg-gradient-to-b from-emerald-50 via-white to-white">
+  <div class="pointer-events-none absolute inset-0">
+    <div class="absolute -top-32 right-0 h-72 w-72 rounded-full bg-emerald-200/40 blur-[140px]"></div>
+    <div class="absolute bottom-6 left-6 h-80 w-80 rounded-full bg-sky-200/45 blur-[160px]"></div>
+    <div class="absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-white via-white/70 to-transparent"></div>
   </div>
 
-  <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-    <div class="rounded-2xl border border-border/40 bg-card text-card-foreground p-5 shadow-sm">
-      <p class="text-sm text-muted-foreground mb-1">Total de notificaciones</p>
-      <p class="text-3xl font-bold text-foreground">{{ notifications().length }}</p>
-    </div>
-    <div class="rounded-2xl border border-border/40 bg-card text-card-foreground p-5 shadow-sm">
-      <p class="text-sm text-muted-foreground mb-1">Sin leer</p>
-      <p class="text-3xl font-bold text-foreground">{{ unreadCount() }}</p>
-    </div>
-    <div class="rounded-2xl border border-border/40 bg-card text-card-foreground p-5 shadow-sm">
-      <p class="text-sm text-muted-foreground mb-1">Leidas</p>
-      <p class="text-3xl font-bold text-foreground">{{ notifications().length - unreadCount() }}</p>
-    </div>
-    <div class="rounded-2xl border border-border/40 bg-card text-card-foreground p-5 shadow-sm">
-      <p class="text-sm text-muted-foreground mb-1">Ultima actualizacion</p>
-      <p class="text-sm text-foreground">
-        {{ notifications().length ? (notifications()[0].updated_at | date:'medium') : 'Sin datos' }}
-      </p>
-    </div>
-  </div>
+  <div class="relative container mx-auto space-y-10 px-4 py-10 font-inter sm:px-6 lg:px-8">
+    <section class="relative overflow-hidden rounded-[40px] border border-white/70 bg-white/90 p-8 shadow-2xl shadow-emerald-100/50 backdrop-blur">
+      <div class="absolute -right-16 top-1/2 hidden h-64 w-64 -translate-y-1/2 rounded-full bg-primary/15 blur-3xl md:block"></div>
+      <div class="space-y-6">
+        <div class="flex flex-wrap items-center justify-between gap-6">
+          <div>
+            <p class="text-xs font-semibold uppercase tracking-[0.4em] text-primary/70">Centro inteligente</p>
+            <h1 class="text-4xl font-semibold text-foreground">Panel principal</h1>
+            <p class="mt-3 max-w-2xl text-muted-foreground">
+              Resumen general del sistema y notificaciones mas recientes con prioridad de riesgo y contexto por canal.
+            </p>
+          </div>
+          <div class="flex flex-wrap gap-3">
+            <button z-button zType="ghost" (click)="setFilter('all')">Ver todo</button>
+            <button z-button zType="secondary" (click)="refreshNotificationList()">Actualizar</button>
+          </div>
+        </div>
+        <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <article class="stat-card">
+            <div class="stat-card__icon text-primary">
+              <z-icon zType="bell" zSize="sm"></z-icon>
+            </div>
+            <div>
+              <p class="stat-card__label">Notificaciones totales</p>
+              <p class="stat-card__value">{{ notifications().length }}</p>
+              <span class="stat-card__hint text-emerald-600">Panel en vivo</span>
+            </div>
+          </article>
+          <article class="stat-card">
+            <div class="stat-card__icon text-amber-500">
+              <z-icon zType="inbox" zSize="sm"></z-icon>
+            </div>
+            <div>
+              <p class="stat-card__label">Sin leer</p>
+              <p class="stat-card__value">{{ unreadCount() }}</p>
+              <span class="stat-card__hint text-amber-600">Prioriza seguimiento</span>
+            </div>
+          </article>
+          <article class="stat-card">
+            <div class="stat-card__icon text-sky-600">
+              <z-icon zType="circle-check" zSize="sm"></z-icon>
+            </div>
+            <div>
+              <p class="stat-card__label">Leidas</p>
+              <p class="stat-card__value">{{ notifications().length - unreadCount() }}</p>
+              <span class="stat-card__hint text-sky-600">Coordinaci&oacute;n completada</span>
+            </div>
+          </article>
+          <article class="stat-card">
+            <div class="stat-card__icon text-emerald-600">
+              <z-icon zType="calendar" zSize="sm"></z-icon>
+            </div>
+            <div>
+              <p class="stat-card__label">&Uacute;ltima actualizaci&oacute;n</p>
+              <p class="stat-card__value text-lg">
+                {{ notifications().length ? (notifications()[0].updated_at | date:'medium') : 'Sin datos' }}
+              </p>
+              <span class="stat-card__hint text-muted-foreground">Sincronizado con la nube</span>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
 
-  <div class="grid gap-6 lg:grid-cols-[3fr_2fr]">
-    <section class="bg-card text-card-foreground border border-border/40 rounded-2xl p-6 shadow-sm">
-      <div class="flex flex-wrap items-center justify-between gap-3 mb-6">
+    <div class="grid gap-6 xl:grid-cols-[2.1fr_1fr]">
+      <section class="glass-panel p-6 md:p-8">
+        <div class="flex flex-wrap items-center justify-between gap-4">
+          <div>
+            <p class="text-xs font-semibold uppercase tracking-[0.4em] text-primary/70">Flujo</p>
+            <h2 class="text-2xl font-semibold">Notificaciones del sistema</h2>
+            <p class="text-sm text-muted-foreground">Selecciona una notificacion para ver los detalles completos.</p>
+          </div>
+          <div class="flex flex-wrap gap-2">
+            <button z-button [zType]="getFilterButtonType('all')" (click)="setFilter('all')">
+              Todas
+            </button>
+            <button z-button [zType]="getFilterButtonType('unread')" (click)="setFilter('unread')">
+              Sin leer
+            </button>
+            <button z-button [zType]="getFilterButtonType('read')" (click)="setFilter('read')">
+              Leidas
+            </button>
+          </div>
+        </div>
+
+        <div *ngIf="isLoading()" class="mt-6 rounded-2xl border border-dashed border-emerald-200/80 bg-emerald-50/40 px-4 py-3 text-sm text-emerald-900">
+          Cargando notificaciones...
+        </div>
+
+        <div *ngIf="!isLoading() && filteredNotifications().length === 0" class="mt-6 rounded-2xl border border-dashed border-slate-200 bg-white/70 px-4 py-3 text-sm text-muted-foreground">
+          No hay notificaciones disponibles con el filtro seleccionado.
+        </div>
+
+        <div *ngIf="!isLoading() && filteredNotifications().length > 0" class="notification-scroll mt-6 space-y-4 overflow-y-auto pr-1">
+          <article
+            *ngFor="let notification of filteredNotifications(); trackBy: trackByNotification"
+            class="group rounded-3xl border border-slate-200/60 bg-white/80 p-5 shadow-lg shadow-emerald-50/60 transition hover:-translate-y-0.5 hover:border-primary/40"
+            (click)="selectNotification(notification)">
+            <div class="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <p class="text-[11px] font-semibold uppercase tracking-[0.3em] text-primary/70">{{ notification.notification_type || 'Sistema' }}</p>
+                <h3 class="text-xl font-semibold text-foreground">{{ notification.title }}</h3>
+              </div>
+              <span
+                class="inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-semibold transition"
+                [ngClass]="notification.is_read
+                  ? 'bg-slate-100 text-slate-600'
+                  : 'bg-primary/10 text-primary'">
+                <span class="h-2 w-2 rounded-full"
+                  [ngClass]="notification.is_read ? 'bg-slate-400' : 'bg-primary animate-pulse'"></span>
+                {{ notification.is_read ? 'Leida' : 'Nueva' }}
+              </span>
+            </div>
+            <p class="mt-2 text-sm text-muted-foreground line-clamp-2">{{ notification.message }}</p>
+            <div class="mt-4 flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
+              <span class="rounded-full border border-slate-200 px-3 py-0.5">Canal {{ notification.channel || 'N/D' }}</span>
+              <span>{{ notification.created_at | date:'short' }}</span>
+            </div>
+            <div class="mt-4 flex flex-wrap gap-2">
+              <button
+                z-button
+                zType="secondary"
+                (click)="markAsRead(notification); $event.stopPropagation()"
+                [disabled]="notification.is_read">
+                Marcar como leida
+              </button>
+              <button
+                z-button
+                zType="destructive"
+                (click)="deleteNotification(notification); $event.stopPropagation()">
+                Eliminar
+              </button>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <div class="space-y-6">
+        <section class="glass-panel p-6">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-xs font-semibold uppercase tracking-[0.4em] text-primary/70">Crear</p>
+              <h2 class="text-xl font-semibold">Nueva notificacion</h2>
+            </div>
+            <span class="rounded-full border border-primary/20 bg-primary/5 px-3 py-1 text-xs font-semibold uppercase tracking-[0.3em] text-primary">Manual</span>
+          </div>
+          <form class="mt-6 space-y-4" (ngSubmit)="createNotification()">
+            <div>
+              <label class="block text-sm font-medium text-foreground">Titulo</label>
+              <input
+                type="text"
+                name="new_notification_title"
+                [(ngModel)]="newNotification.title"
+                required
+                placeholder="Alerta temprana de clima"
+                class="mt-1 block w-full rounded-2xl border border-slate-200/70 bg-white/80 px-4 py-2.5 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30" />
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-foreground">Mensaje</label>
+              <textarea
+                rows="3"
+                name="new_notification_message"
+                [(ngModel)]="newNotification.message"
+                required
+                placeholder="Describe el evento para el equipo de campo"
+                class="mt-1 block w-full rounded-2xl border border-slate-200/70 bg-white/80 px-4 py-2.5 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30"></textarea>
+            </div>
+
+            <div class="grid gap-4 sm:grid-cols-2">
+              <div>
+                <label class="block text-sm font-medium text-foreground">Tipo</label>
+                <input
+                  type="text"
+                  name="new_notification_type"
+                  [(ngModel)]="newNotification.notification_type"
+                  class="mt-1 block w-full rounded-2xl border border-slate-200/70 bg-white/80 px-4 py-2.5 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30" />
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-foreground">Canal</label>
+                <input
+                  type="text"
+                  name="new_notification_channel"
+                  [(ngModel)]="newNotification.channel"
+                  class="mt-1 block w-full rounded-2xl border border-slate-200/70 bg-white/80 px-4 py-2.5 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30" />
+              </div>
+              <div class="sm:col-span-2">
+                <label class="block text-sm font-medium text-foreground">Usuario (opcional)</label>
+                <input
+                  type="number"
+                  name="new_notification_user"
+                  [(ngModel)]="newNotification.user_id"
+                  min="1"
+                  class="mt-1 block w-full rounded-2xl border border-slate-200/70 bg-white/80 px-4 py-2.5 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30" />
+              </div>
+            </div>
+
+            <button z-button type="submit" class="w-full">Guardar notificacion</button>
+          </form>
+        </section>
+
+        <section class="glass-panel p-6">
+          <div class="flex items-baseline justify-between gap-3">
+            <div>
+              <p class="text-xs font-semibold uppercase tracking-[0.4em] text-primary/70">Timeline</p>
+              <h2 class="text-xl font-semibold">Actividad reciente</h2>
+            </div>
+            <span class="text-xs text-muted-foreground">{{ notifications().length ? 'Ultimas 4 entradas' : 'Sin registros' }}</span>
+          </div>
+          <div *ngIf="notifications().length === 0" class="mt-4 rounded-2xl border border-dashed border-slate-200 px-4 py-3 text-sm text-muted-foreground">
+            Todavia no hay actividad para mostrar.
+          </div>
+          <ul *ngIf="notifications().length" class="mt-6 space-y-5">
+            <li *ngFor="let notification of notifications() | slice:0:4" class="relative rounded-2xl border border-slate-200/60 bg-white/70 p-4 pl-6">
+              <span class="timeline-dot"></span>
+              <p class="text-sm font-semibold text-foreground">{{ notification.title }}</p>
+              <p class="text-xs text-muted-foreground">{{ notification.created_at | date:'medium' }}</p>
+              <p class="mt-1 text-sm text-muted-foreground line-clamp-2">{{ notification.message }}</p>
+            </li>
+          </ul>
+        </section>
+      </div>
+    </div>
+
+    <section *ngIf="selectedNotification()" class="glass-panel glass-panel--accent p-6 md:p-8">
+      <div class="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h2 class="text-xl font-semibold">Notificaciones del sistema</h2>
-          <p class="text-sm text-muted-foreground">Selecciona una notificacion para ver los detalles completos.</p>
+          <p class="text-xs font-semibold uppercase tracking-[0.4em] text-primary/70">Detalle</p>
+          <h2 class="text-2xl font-semibold">Notificacion seleccionada</h2>
         </div>
         <div class="flex flex-wrap gap-2">
           <button
             z-button
-            [zType]="getFilterButtonType('all')"
-            (click)="setFilter('all')">
-            Todas
+            zType="secondary"
+            (click)="markAsRead(selectedNotification()!)"
+            [disabled]="selectedNotification()!.is_read">
+            Marcar como leida
           </button>
-          <button
-            z-button
-            [zType]="getFilterButtonType('unread')"
-            (click)="setFilter('unread')">
-            Sin leer
-          </button>
-          <button
-            z-button
-            [zType]="getFilterButtonType('read')"
-            (click)="setFilter('read')">
-            Leidas
-          </button>
+          <button z-button zType="ghost" (click)="selectedNotification.set(null)">Cerrar</button>
         </div>
       </div>
 
-      <div *ngIf="isLoading()" class="text-sm text-muted-foreground">
-        Cargando notificaciones...
-      </div>
-
-      <div *ngIf="!isLoading() && filteredNotifications().length === 0" class="text-sm text-muted-foreground">
-        No hay notificaciones disponibles con el filtro seleccionado.
-      </div>
-
-      <div *ngIf="!isLoading() && filteredNotifications().length > 0" class="space-y-4 notification-scroll overflow-y-auto pr-2">
-        <article
-          *ngFor="let notification of filteredNotifications(); trackBy: trackByNotification"
-          class="rounded-xl border border-border/40 bg-muted/20 p-4 cursor-pointer hover:border-primary transition"
-          (click)="selectNotification(notification)">
-          <div class="flex flex-wrap items-center justify-between gap-2">
-            <h3 class="text-lg font-semibold text-foreground">{{ notification.title }}</h3>
-            <span
-              class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold"
-              [ngClass]="notification.is_read
-                ? 'bg-slate-200 text-slate-700 dark:bg-slate-900 dark:text-slate-200'
-                : 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-200'">
-              {{ notification.is_read ? 'Leida' : 'Nueva' }}
-            </span>
-          </div>
-          <p class="text-sm text-muted-foreground line-clamp-2">{{ notification.message }}</p>
-          <div class="mt-3 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-            <span class="rounded-full border border-border/60 px-2 py-0.5">
-              {{ notification.notification_type }}
-            </span>
-            <span class="rounded-full border border-border/60 px-2 py-0.5">
-              Canal: {{ notification.channel || 'no especificado' }}
-            </span>
-            <span>{{ notification.created_at | date:'short' }}</span>
-          </div>
-          <div class="mt-4 flex flex-wrap gap-2">
-            <button
-              z-button
-              zType="secondary"
-              (click)="markAsRead(notification); $event.stopPropagation()"
-              [disabled]="notification.is_read">
-              Marcar como leida
-            </button>
-            <button
-              z-button
-              zType="destructive"
-              (click)="deleteNotification(notification); $event.stopPropagation()">
-              Eliminar
-            </button>
-          </div>
-        </article>
-      </div>
-    </section>
-
-    <section class="bg-card text-card-foreground border border-border/40 rounded-2xl p-6 shadow-sm">
-      <h2 class="text-xl font-semibold mb-4">Crear notificacion</h2>
-      <form class="space-y-4" (ngSubmit)="createNotification()">
+      <dl class="mt-6 grid gap-4 sm:grid-cols-2">
         <div>
-          <label class="block text-sm font-medium text-foreground">Titulo</label>
-          <input
-            type="text"
-            name="new_notification_title"
-            [(ngModel)]="newNotification.title"
-            required
-            class="mt-1 block w-full rounded-lg border border-border/50 bg-background px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary" />
+          <dt class="detail-label">Titulo</dt>
+          <dd class="detail-value">{{ selectedNotification()!.title }}</dd>
         </div>
-
         <div>
-          <label class="block text-sm font-medium text-foreground">Mensaje</label>
-          <textarea
-            rows="3"
-            name="new_notification_message"
-            [(ngModel)]="newNotification.message"
-            required
-            class="mt-1 block w-full rounded-lg border border-border/50 bg-background px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary"></textarea>
+          <dt class="detail-label">Estado</dt>
+          <dd class="detail-value">{{ selectedNotification()!.is_read ? 'Leida' : 'Sin leer' }}</dd>
         </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label class="block text-sm font-medium text-foreground">Tipo</label>
-            <input
-              type="text"
-              name="new_notification_type"
-              [(ngModel)]="newNotification.notification_type"
-              class="mt-1 block w-full rounded-lg border border-border/50 bg-background px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary" />
-          </div>
-          <div>
-            <label class="block text-sm font-medium text-foreground">Canal</label>
-            <input
-              type="text"
-              name="new_notification_channel"
-              [(ngModel)]="newNotification.channel"
-              class="mt-1 block w-full rounded-lg border border-border/50 bg-background px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary" />
-          </div>
-          <div>
-            <label class="block text-sm font-medium text-foreground">Usuario</label>
-            <input
-              type="number"
-              name="new_notification_user"
-              [(ngModel)]="newNotification.user_id"
-              min="1"
-              class="mt-1 block w-full rounded-lg border border-border/50 bg-background px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary" />
-          </div>
+        <div class="sm:col-span-2">
+          <dt class="detail-label">Mensaje</dt>
+          <dd class="detail-value text-sm text-muted-foreground whitespace-pre-line">{{ selectedNotification()!.message }}</dd>
         </div>
-
-        <button z-button type="submit" class="w-full">Guardar notificacion</button>
-      </form>
+        <div>
+          <dt class="detail-label">Tipo</dt>
+          <dd class="detail-value">{{ selectedNotification()!.notification_type }}</dd>
+        </div>
+        <div>
+          <dt class="detail-label">Canal</dt>
+          <dd class="detail-value">{{ selectedNotification()!.channel || 'No especificado' }}</dd>
+        </div>
+        <div>
+          <dt class="detail-label">Creada</dt>
+          <dd class="detail-value">{{ selectedNotification()!.created_at | date:'medium' }}</dd>
+        </div>
+        <div>
+          <dt class="detail-label">Actualizada</dt>
+          <dd class="detail-value">{{ selectedNotification()!.updated_at | date:'medium' }}</dd>
+        </div>
+      </dl>
     </section>
   </div>
-
-  <section *ngIf="selectedNotification()" class="bg-card text-card-foreground border border-border/40 rounded-2xl p-6 shadow-sm">
-    <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
-      <div>
-        <h2 class="text-xl font-semibold">Detalle de notificacion</h2>
-        <p class="text-sm text-muted-foreground">Informacion completa de la notificacion seleccionada.</p>
-      </div>
-      <div class="flex gap-2">
-        <button
-          z-button
-          zType="secondary"
-          (click)="markAsRead(selectedNotification()!)"
-          [disabled]="selectedNotification()!.is_read">
-          Marcar como leida
-        </button>
-        <button z-button zType="ghost" (click)="selectedNotification.set(null)">Cerrar</button>
-      </div>
-    </div>
-
-    <dl class="grid gap-4 sm:grid-cols-2">
-      <div>
-        <dt class="text-xs uppercase text-muted-foreground">Titulo</dt>
-        <dd class="text-lg font-semibold text-foreground">{{ selectedNotification()!.title }}</dd>
-      </div>
-      <div>
-        <dt class="text-xs uppercase text-muted-foreground">Estado</dt>
-        <dd class="text-sm text-foreground">{{ selectedNotification()!.is_read ? 'Leida' : 'Sin leer' }}</dd>
-      </div>
-      <div class="sm:col-span-2">
-        <dt class="text-xs uppercase text-muted-foreground">Mensaje</dt>
-        <dd class="text-sm text-foreground whitespace-pre-line">{{ selectedNotification()!.message }}</dd>
-      </div>
-      <div>
-        <dt class="text-xs uppercase text-muted-foreground">Tipo</dt>
-        <dd class="text-sm text-foreground">{{ selectedNotification()!.notification_type }}</dd>
-      </div>
-      <div>
-        <dt class="text-xs uppercase text-muted-foreground">Canal</dt>
-        <dd class="text-sm text-foreground">{{ selectedNotification()!.channel || 'no especificado' }}</dd>
-      </div>
-      <div>
-        <dt class="text-xs uppercase text-muted-foreground">Creada</dt>
-        <dd class="text-sm text-foreground">{{ selectedNotification()!.created_at | date:'medium' }}</dd>
-      </div>
-      <div>
-        <dt class="text-xs uppercase text-muted-foreground">Ultima actualizacion</dt>
-        <dd class="text-sm text-foreground">{{ selectedNotification()!.updated_at | date:'medium' }}</dd>
-      </div>
-      <div>
-        <dt class="text-xs uppercase text-muted-foreground">Leida el</dt>
-        <dd class="text-sm text-foreground">
-          {{ selectedNotification()!.read_at ? (selectedNotification()!.read_at | date:'medium') : 'Pendiente' }}
-        </dd>
-      </div>
-    </dl>
-  </section>
 </div>

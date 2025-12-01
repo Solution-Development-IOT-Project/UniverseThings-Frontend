@@ -197,7 +197,7 @@ type RegisterFormModel = {
             </form>
 
             <p class="mt-6 text-center text-sm text-muted-foreground">
-              ¿Ya tienes una cuenta?
+              &iquest;Ya tienes una cuenta?
               <a routerLink="/login" class="font-semibold text-primary hover:underline">Inicia sesion aqui</a>
             </p>
           </div>

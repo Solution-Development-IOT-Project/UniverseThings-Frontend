@@ -1,0 +1,239 @@
+<z-toaster></z-toaster>
+
+<div class="relative isolate overflow-hidden bg-gradient-to-b from-sky-50 via-white to-white">
+  <div class="pointer-events-none absolute inset-0">
+    <div class="absolute -top-32 left-10 h-80 w-80 rounded-full bg-emerald-100 blur-[150px]"></div>
+    <div class="absolute bottom-0 right-10 h-96 w-96 rounded-full bg-sky-100 blur-[170px]"></div>
+    <div class="absolute inset-x-10 top-10 rounded-[40px] border border-white/60"></div>
+  </div>
+
+  <div class="relative container mx-auto space-y-10 px-4 py-10 font-inter sm:px-6 lg:px-8">
+    <section class="alerts-hero">
+      <div class="flex flex-wrap items-center justify-between gap-6">
+        <div>
+          <p class="text-xs font-semibold uppercase tracking-[0.4em] text-primary/70">Monitor</p>
+          <h1 class="text-4xl font-semibold text-foreground">Panel de alertas</h1>
+          <p class="mt-2 text-muted-foreground max-w-2xl">
+            Monitorea y gestiona las alertas generadas por el sistema con filtros por severidad, estado y zona.
+          </p>
+        </div>
+        <div class="flex flex-wrap gap-3">
+          <button z-button zType="ghost" (click)="setFilter('unread')">Priorizar</button>
+          <button z-button zType="secondary" (click)="refreshAlerts()">Actualizar</button>
+        </div>
+      </div>
+
+      <div class="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <article class="summary-card">
+          <div class="summary-icon text-primary">
+            <z-icon zType="bell" zSize="sm"></z-icon>
+          </div>
+          <div>
+            <p class="summary-label">Alertas totales</p>
+            <p class="summary-value">{{ alerts().length }}</p>
+            <span class="summary-hint text-primary">Feed en tiempo real</span>
+          </div>
+        </article>
+        <article class="summary-card">
+          <div class="summary-icon text-amber-500">
+            <z-icon zType="triangle-alert" zSize="sm"></z-icon>
+          </div>
+          <div>
+            <p class="summary-label">Sin leer</p>
+            <p class="summary-value">{{ unreadCount() }}</p>
+            <span class="summary-hint text-amber-600">Requieren revisi&oacute;n</span>
+          </div>
+        </article>
+        <article class="summary-card">
+          <div class="summary-icon text-emerald-600">
+            <z-icon zType="shield" zSize="sm"></z-icon>
+          </div>
+          <div>
+            <p class="summary-label">Resueltas</p>
+            <p class="summary-value">{{ resolvedCount() }}</p>
+            <span class="summary-hint text-emerald-600">Protocolos aplicados</span>
+          </div>
+        </article>
+        <article class="summary-card">
+          <div class="summary-icon text-slate-600">
+            <z-icon zType="calendar" zSize="sm"></z-icon>
+          </div>
+          <div>
+            <p class="summary-label">&Uacute;ltima alerta</p>
+            <p class="summary-text">
+              {{ alerts().length ? (alerts()[0].created_at | date:'short') : 'Sin datos' }}
+            </p>
+            <span class="summary-hint text-muted-foreground">Ordenado por prioridad</span>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <div class="grid gap-6 xl:grid-cols-[2.2fr_1fr]">
+      <section class="panel">
+        <div class="flex flex-wrap items-center justify-between gap-4">
+          <div>
+            <p class="text-xs font-semibold uppercase tracking-[0.4em] text-primary/70">Flujo</p>
+            <h2 class="text-2xl font-semibold">Historial de alertas</h2>
+            <p class="text-sm text-muted-foreground">Selecciona una alerta para conocer m&aacute;s detalles.</p>
+          </div>
+          <div class="flex flex-wrap gap-2">
+            <button z-button [zType]="filter() === 'all' ? 'default' : 'ghost'" (click)="setFilter('all')">Todas</button>
+            <button z-button [zType]="filter() === 'unread' ? 'secondary' : 'ghost'" (click)="setFilter('unread')">Sin leer</button>
+            <button z-button [zType]="filter() === 'resolved' ? 'secondary' : 'ghost'" (click)="setFilter('resolved')">Resueltas</button>
+            <label class="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white/80 px-3 py-1 text-xs font-semibold text-muted-foreground">
+              Severidad
+              <select
+                class="bg-transparent text-sm focus:outline-none"
+                [value]="severityFilter()"
+                (change)="handleSeverityChange($event)">
+                <option value="all">Todas</option>
+                <option value="info">Info</option>
+                <option value="warning">Warning</option>
+                <option value="critical">Critical</option>
+              </select>
+            </label>
+          </div>
+        </div>
+
+        <div *ngIf="isLoading()" class="mt-6 rounded-2xl border border-dashed border-emerald-200/80 bg-emerald-50/50 px-4 py-3 text-sm text-emerald-900">
+          Cargando alertas...
+        </div>
+
+        <div *ngIf="!isLoading() && filteredAlerts().length === 0" class="mt-6 rounded-2xl border border-dashed border-slate-200 px-4 py-3 text-sm text-muted-foreground">
+          No hay alertas con los filtros seleccionados.
+        </div>
+
+        <div *ngIf="!isLoading() && filteredAlerts().length > 0" class="alerts-scroll mt-6 space-y-4 overflow-y-auto pr-1">
+          <article
+            *ngFor="let alert of filteredAlerts(); trackBy: trackByAlert"
+            class="alert-card"
+            (click)="selectAlert(alert)">
+            <div class="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <p class="text-[11px] font-semibold uppercase tracking-[0.3em] text-primary/70">Severidad: {{ alert.severity }}</p>
+                <h3 class="text-xl font-semibold text-foreground">{{ alert.message }}</h3>
+              </div>
+              <span class="badge" [ngClass]="alert.is_read ? 'badge-read' : 'badge-unread'">
+                {{ alert.is_read ? 'Leida' : 'Nueva' }}
+              </span>
+            </div>
+            <p class="mt-2 text-sm text-muted-foreground line-clamp-2">{{ alert.details || 'Sin detalles adicionales' }}</p>
+            <div class="meta">
+              <span>Zona: {{ alert.zone_id || 'N/D' }}</span>
+              <span>Sensor: {{ alert.sensor_id || 'N/D' }}</span>
+              <span>{{ alert.created_at | date:'short' }}</span>
+            </div>
+            <div class="mt-4 flex flex-wrap gap-2">
+              <button z-button zType="secondary" (click)="markAsRead(alert); $event.stopPropagation()" [disabled]="alert.is_read">
+                Marcar leida
+              </button>
+              <button z-button zType="default" (click)="resolveAlert(alert); $event.stopPropagation()" [disabled]="alert.resolved_at">
+                Marcar resuelta
+              </button>
+              <button z-button zType="destructive" (click)="deleteAlert(alert); $event.stopPropagation()">
+                Eliminar
+              </button>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section class="panel panel--accent">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-xs font-semibold uppercase tracking-[0.4em] text-primary/70">Crear</p>
+            <h2 class="text-xl font-semibold">Nueva alerta manual</h2>
+            <p class="text-sm text-muted-foreground">Sincronizada con el backend en tiempo real.</p>
+          </div>
+          <span class="rounded-full border border-primary/20 bg-primary/5 px-3 py-1 text-xs font-semibold uppercase tracking-[0.3em] text-primary">Live</span>
+        </div>
+        <form class="mt-6 space-y-4" (ngSubmit)="createAlert()">
+          <div>
+            <label class="block text-sm font-medium text-foreground">Mensaje</label>
+            <input type="text" name="alert_message" [(ngModel)]="newAlert.message" required class="input" placeholder="Descripcion corta de la alerta" />
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-foreground">Detalles</label>
+            <textarea rows="3" name="alert_details" [(ngModel)]="newAlert.details" class="input" placeholder="Contexto adicional o acciones sugeridas"></textarea>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-foreground">Severidad</label>
+              <select name="alert_severity" [(ngModel)]="newAlert.severity" class="input">
+                <option value="info">Info</option>
+                <option value="warning">Warning</option>
+                <option value="critical">Critical</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-foreground">Zona</label>
+              <input type="number" name="alert_zone" [(ngModel)]="newAlert.zone_id" class="input" min="1" placeholder="ID zona" />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-foreground">Sensor</label>
+              <input type="number" name="alert_sensor" [(ngModel)]="newAlert.sensor_id" class="input" min="1" placeholder="ID sensor" />
+            </div>
+          </div>
+          <button z-button type="submit" class="w-full">Crear alerta</button>
+        </form>
+      </section>
+    </div>
+
+    <section *ngIf="selectedAlert()" class="panel panel--highlight">
+      <div class="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <p class="text-xs font-semibold uppercase tracking-[0.4em] text-primary/70">Detalle</p>
+          <h2 class="text-2xl font-semibold">Detalle de la alerta</h2>
+          <p class="text-sm text-muted-foreground">Informaci&oacute;n sincronizada con el backend.</p>
+        </div>
+        <div class="flex flex-wrap gap-2">
+          <button z-button zType="secondary" (click)="markAsRead(selectedAlert()!)" [disabled]="selectedAlert()!.is_read">
+            Marcar leida
+          </button>
+          <button z-button zType="default" (click)="resolveAlert(selectedAlert()!)" [disabled]="selectedAlert()!.resolved_at">
+            Resolver
+          </button>
+          <button z-button zType="ghost" (click)="selectedAlert.set(null)">
+            Cerrar
+          </button>
+        </div>
+      </div>
+
+      <dl class="mt-6 grid gap-4 md:grid-cols-2">
+        <div>
+          <dt class="detail-label">Mensaje</dt>
+          <dd class="detail-value">{{ selectedAlert()!.message }}</dd>
+        </div>
+        <div>
+          <dt class="detail-label">Estado</dt>
+          <dd class="detail-value">{{ selectedAlert()!.resolved_at ? 'Resuelta' : 'Activa' }}</dd>
+        </div>
+        <div class="md:col-span-2">
+          <dt class="detail-label">Detalles</dt>
+          <dd class="detail-value text-sm text-muted-foreground whitespace-pre-line">{{ selectedAlert()!.details || 'Sin descripcion' }}</dd>
+        </div>
+        <div>
+          <dt class="detail-label">Severidad</dt>
+          <dd class="detail-value">{{ selectedAlert()!.severity }}</dd>
+        </div>
+        <div>
+          <dt class="detail-label">Zona</dt>
+          <dd class="detail-value">{{ selectedAlert()!.zone_id || 'N/D' }}</dd>
+        </div>
+        <div>
+          <dt class="detail-label">Sensor</dt>
+          <dd class="detail-value">{{ selectedAlert()!.sensor_id || 'N/D' }}</dd>
+        </div>
+        <div>
+          <dt class="detail-label">Creada</dt>
+          <dd class="detail-value">{{ selectedAlert()!.created_at | date:'medium' }}</dd>
+        </div>
+        <div>
+          <dt class="detail-label">Resuelta</dt>
+          <dd class="detail-value">{{ selectedAlert()!.resolved_at ? (selectedAlert()!.resolved_at | date:'medium') : 'Sin datos' }}</dd>
+        </div>
+      </dl>
+    </section>
+  </div>
+</div>

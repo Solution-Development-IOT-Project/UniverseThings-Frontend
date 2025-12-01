@@ -2,6 +2,7 @@ import { Component, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ZardButtonComponent } from '@shared/components/button/button.component';
+import { ZardIconComponent } from '@shared/components/icon/icon.component';
 import { NotificationService } from '../services/notification.service';
 import { Notification, NewNotification } from '../models/notification.model';
 import { toast } from 'ngx-sonner';
@@ -9,7 +10,7 @@ import { toast } from 'ngx-sonner';
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, FormsModule, ZardButtonComponent],
+  imports: [CommonModule, FormsModule, ZardButtonComponent, ZardIconComponent],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.css'
 })

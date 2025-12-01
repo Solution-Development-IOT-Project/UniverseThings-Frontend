@@ -1,0 +1,108 @@
+:host {
+  display: block;
+}
+
+.cameras-hero {
+  border-radius: 2.5rem;
+  border: 1px solid rgba(59, 130, 246, 0.25);
+  background: radial-gradient(circle at top, rgba(16, 185, 129, 0.12), transparent 55%), rgba(255, 255, 255, 0.95);
+  padding: 2.5rem;
+  box-shadow: 0 30px 60px rgba(15, 23, 42, 0.1);
+}
+
+.panel {
+  border-radius: 1.75rem;
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 25px 60px rgba(15, 23, 42, 0.08);
+}
+
+.panel--warning {
+  border-color: rgba(251, 191, 36, 0.6);
+  background: radial-gradient(circle at top, rgba(251, 191, 36, 0.12), transparent 55%), rgba(255, 255, 255, 0.95);
+}
+
+.panel--accent {
+  border-color: rgba(59, 130, 246, 0.45);
+  background: radial-gradient(circle at top, rgba(59, 130, 246, 0.1), transparent 60%), rgba(255, 255, 255, 0.95);
+}
+
+.stat-card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  border-radius: 1.75rem;
+  padding: 1.5rem;
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: 0 20px 45px rgba(15, 23, 42, 0.08);
+}
+
+.stat-card__icon {
+  display: inline-flex;
+  width: 3.25rem;
+  height: 3.25rem;
+  border-radius: 1.5rem;
+  align-items: center;
+  justify-content: center;
+  background: rgba(16, 185, 129, 0.12);
+}
+
+.stat-card__label {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.3em;
+  color: rgba(71, 85, 105, 0.8);
+}
+
+.stat-card__value {
+  font-size: 2rem;
+  font-weight: 600;
+  color: rgb(15, 23, 42);
+}
+
+.stat-card__hint {
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.detail-label {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.3em;
+  color: rgb(100 116 139);
+}
+
+.detail-value {
+  font-size: 1rem;
+  font-weight: 600;
+  color: rgb(15 23 42);
+}
+
+.form-input {
+  width: 100%;
+  margin-top: 0.35rem;
+  border-radius: 1.25rem;
+  border: 1px solid rgba(148, 163, 184, 0.6);
+  padding: 0.75rem 1rem;
+  background: rgba(255, 255, 255, 0.92);
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.form-input:focus {
+  border-color: rgba(16, 185, 129, 0.7);
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2);
+}
+
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.35rem 0.9rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  background: rgba(148, 163, 184, 0.15);
+  color: rgb(71, 85, 105);
+}

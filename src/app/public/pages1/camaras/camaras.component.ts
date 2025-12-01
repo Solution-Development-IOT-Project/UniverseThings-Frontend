@@ -2,6 +2,7 @@ import { Component, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ZardButtonComponent } from '@shared/components/button/button.component';
+import { ZardIconComponent } from '@shared/components/icon/icon.component';
 import {
   Camera,
   CameraImage,
@@ -19,7 +20,7 @@ import { toast } from 'ngx-sonner';
 @Component({
   selector: 'app-camaras',
   standalone: true,
-  imports: [CommonModule, FormsModule, ZardButtonComponent],
+  imports: [CommonModule, FormsModule, ZardButtonComponent, ZardIconComponent],
   templateUrl: './camaras.component.html',
   styleUrl: './camaras.component.css'
 })
@@ -43,6 +44,9 @@ export class CamarasComponent implements OnInit {
     }
     return list.filter(image => image.camera_id === filter);
   });
+  activeCameraCount = computed(() => this.cameras().filter((camera) => camera.is_active).length);
+  inactiveCameraCount = computed(() => this.cameras().filter((camera) => !camera.is_active).length);
+  imageCatalogCount = computed(() => this.allImages().length);
 
   newCamera: NewCamera = this.buildEmptyCamera();
   newImage: NewCameraImage = this.buildEmptyImage();
